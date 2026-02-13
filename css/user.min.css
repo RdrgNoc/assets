@@ -1,0 +1,101 @@
+.pre-loader {
+    background: #fff;
+    background-position: center center;
+    background-size: 13%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 12345;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+    .pre-loader img {
+        width: 225px;
+        height: 225px;
+    }
+
+    .pre-loader .loader-logo {
+        padding-bottom: 15px
+    }
+
+    .pre-loader .loader-progress {
+        height: 8px;
+        border-radius: 15px;
+        max-width: 200px;
+        margin: 0 auto;
+        display: block;
+        background: #ecf0f4;
+        overflow: hidden
+    }
+
+    .pre-loader .bar {
+        width: 0%;
+        height: 8px;
+        display: block;
+        background: #a02142;
+    }
+
+    .pre-loader .percent {
+        text-align: center;
+        font-size: 24px;
+        display: none
+    }
+
+    .pre-loader .loading-text {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 500;
+        padding-top: 15px
+    }
+
+.bg-cherry {
+    background-color: #5f2132;
+    /*background-color: #3d3d3d;*/
+}
+
+.text-cherry {
+    color: #5f2132;
+    /*color: #3d3d3d;*/
+}
+
+.bg-gold {
+    background-color: #bc945b;
+    /*background-color: #f4f4f4;*/
+}
+
+.text-gold {
+    color: #bc945b;
+    /*color: #f4f4f4;*/
+}
+
+.customButton {
+    --falcon-btn-padding-y: .1rem !important;
+    --falcon-btn-padding-x: .4rem !important;
+    --falcon-btn-font-size: .8rem !important;
+}
+
+.customButtonXxs {
+    --falcon-btn-padding-y: .08rem !important;
+    --falcon-btn-padding-x: .2rem !important;
+    --falcon-btn-font-size: .65rem !important;
+}
+
+.fs-10-5 {
+    font-size: .76rem !important;
+}
+
+.fs-12 {
+    font-size: .6rem !important;
+}
