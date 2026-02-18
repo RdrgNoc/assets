@@ -37,13 +37,11 @@ const d = new Date();
 // }
 
 function validarMedida(valor, unidad) {
-
+    logger.error("Validando medida con valor:", valor, "y unidad:", unidad);
     const numero = parseFloat(valor);
+    logger.error("Número parseado:", numero);
 
-    if (valor.trim() === '' || isNaN(numero)) {
-        showMsg("Debe ingresar un número válido.", 'error');
-        return false;
-    }
+    if (isNaN(numero)) { showMsg("Debe ingresar un número válido.", 'error'); return false; }
 
     switch (unidad) {
 
@@ -56,34 +54,31 @@ function validarMedida(valor, unidad) {
                 showMsg("El porcentaje no puede ser mayor a 100.", 'warning');
                 return false;
             }
-            break;
-
+            return true;
         case '2':
             if (!Number.isInteger(numero)) {
                 showMsg("Las horas deben ser números enteros.", 'error');
                 return false;
             }
             if (numero <= 0) {
-                showMsg("Las horas no puden ser menores que 1.", 'warning');
+                showMsg("Las horas no pueden ser menores que 1.", 'warning');
                 return false;
             }
-            break;
-
+            return true;
         case '3':
             if (!Number.isInteger(numero)) {
                 showMsg("Los días deben ser números enteros.", 'error');
                 return false;
             }
             if (numero <= 0) {
-                showMsg("Los días no puden ser menores que 1.", 'warning');
+                showMsg("Los días no pueden ser menores que 1.", 'warning');
                 return false;
             }
             if (numero > 365) {
                 showMsg("Los días no pueden ser mayores a 365.", 'warning');
                 return false;
             }
-            break;
-
+            return true;
         case '4':
             if (!Number.isInteger(numero)) {
                 showMsg("Las unidades deben ser números enteros.", 'error');
@@ -93,14 +88,10 @@ function validarMedida(valor, unidad) {
                 showMsg("Las unidades deben ser mayores que 0.", 'warning');
                 return false;
             }
-            break;
-
+            return true;
         default:
-            showMsg("Unidad de medida inválida.", 'error');
             return false;
     }
-
-    return true;
 }
 
 
