@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: wukong-slayer.js
+const WUKONG_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 const timingNoty = 3500;
 var idUser = $("#MainContent_hddnIdUsuario").val();
@@ -83,7 +87,7 @@ var obtenerSelectDatosEfiscal = function () {
             const select = $("#cboEfiscal");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
             select.val(cveEfiscald);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -97,7 +101,7 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
             const select = $("#cboOs");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
             select.val(cveOSd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -111,7 +115,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
             const select = $("#cboUp");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
             select.val(cveUPd === '' ? 0 : tipo === 'cambio' ? txtOS === cveOSd ? cveUPd : 0 : cveUPd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -131,7 +135,7 @@ $(document).ready(function () {
     if (idRolUser === '101') {
         logger.log("Usuario captura");
         $("#cboOs").attr("disabled", true);
-        $("#cboUp").attr("disabled", true);
+        $("#cboUp").attr("disabled", false);
 
         gDr(cveOSd, cveUPd, cveEfiscald);
     } else if (idRolUser === '103' || idRolUser === '104') {

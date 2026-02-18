@@ -1,4 +1,9 @@
-﻿'use strict';
+﻿
+// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: doom-slayer.js
+const DOOM_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 const timingNoty = 3500;
 var idUser = $("#MainContent_hddnIdUsuario").val();
@@ -16,34 +21,20 @@ const columnActividad = $("#columnActividad");
 
 let mesesSeleccionados = [];
 
-// function comboGD(index, data) {
-//     fetchDataArr(index, data, 0, function (response) {
-//         if (response) {
-//             logger.log("Datos recibidos a combo:", index, response);
-//             return response;
-//         } else if (response === "error") {
-//             showMsg("Error al cargar datos", 'error');
-//             return;
-//         }
-//     });
-// }
-
 function gDalCount(cveOS, cveUP, _eFiscal) {
     fetchDataArr(0, { _OS: cveOS, _UP: cveUP, __eFiscal: _eFiscal }, 0, function (response) {
-        if (response) {
-            logger.log("Datos recibidos a conteo ALINEACION:", response);
-            if (response !== 'error') {
-                if (response.length !== null) {
-                    $("#txtNoFolio").val(`${cveUP}.${response.length + 1}`);
-                } else {
-                    $("#txtNoFolio").val(`${cveUP}.${response.length + 1}`);
-                }
-            } else {
-                showMsg("Ocurrio un error al mostrar resultados.", 'error');
-            }
-        } else if (response === "error") {
+        if (!response || response === "error") {
             showMsg("Error al cargar datos", 'error');
+            return;
         }
+        logger.log("Datos recibidos a conteo ALINEACION:", response);
+        if (response === 'error') {
+            showMsg("Ocurrio un error al mostrar resultados...", 'error');
+            return;
+        }
+        // Si response.length es null o undefined, se asigna 1
+        const length = (typeof response.length === 'number' && response.length !== null) ? response.length : 0;
+        $("#txtNoFolio").val(`${cveUP}.${length + 1}`);
     });
 }
 
@@ -529,8 +520,8 @@ function uPri2(idImpacto, idProbabilidad, idCuadrante, idRiesgo) {
     });
 }
 
-function uPri3(cveOS, cveUP, idRiesgos) {
-    fetchDataArr(53, { _OS: cveOS, _UP: cveUP, arrRiesgos: idRiesgos, _idUser: idUser }, 0, function (response) {
+function uPri3(cveOS, cveUP, idRiesgos, eFiscal) {
+    fetchDataArr(53, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal, arrRiesgos: idRiesgos, _idUser: idUser }, 0, function (response) {
         if (response) {
             logger.log("Respuesta a UPDATE RIESGO PARA VALIDACION:", response.split("|"));
             var responseS = response.split("|");
@@ -1707,8 +1698,8 @@ function gDact(idAccion, numControlActividad) {
     });
 }
 
-function gDpr(idProceso, OS, UP) {
-    fetchDataArr(14, { idProceso: idProceso, _OS: OS, _UP: UP }, 0, function (response) {
+function gDpr(idProceso, OS, UP, eFiscal) {
+    fetchDataArr(14, { idProceso: idProceso, _OS: OS, _UP: UP, __eFiscal: eFiscal }, 0, function (response) {
         if (response) {
             logger.log("Datos recibidos a PROCESO:", response);
             if (response !== 'error') {
@@ -2884,1336 +2875,1346 @@ function settingCount(cveOS, cveUP, eFiscal) {
     });
 }
 
-$(document).ready(function () {
-    loadEndpoints(0);
-    columnAlineacion.hide();
-    columnRiesgo.hide();
-    columnFactor.hide();
-    columnControl.hide();
-    columnAccion.hide();
-    columnActividad.hide();
-    //getNewChart()
+fetchDataArr(79, { _jsVersion: DOOM_SLAYER_VERSION }, 0, function (response) {
+    if (!response.flagVersion) {
+        showMsg("La versión de la pantalla es obsoleta, por favor actualice para continuar, si persiste el problema, contacte al administrador del sistema.", 'error');
+        return;
+    } else {
+        $(document).ready(function () {
+            loadEndpoints(0);
+            columnAlineacion.hide();
+            columnRiesgo.hide();
+            columnFactor.hide();
+            columnControl.hide();
+            columnAccion.hide();
+            columnActividad.hide();
 
-    if (idRolUser === '101') {
-        //gRes(20)
-        gDfCefiscal();
-        gDfCos(cveEfiscald);
-        gDfCup(cveEfiscald, cveOSd, '');
-        $("#cboOs").attr("disabled", true);
-        $("#cboUp").attr("disabled", false);
-        $("#cboCuadrante").attr("disabled", true);
-        $("#cboCuadranteFin").attr("disabled", true);
-        $("#cboTrimestre").attr("disabled", true);
+            if (idRolUser === '101') {
+                //gRes(20)
+                gDfCefiscal();
+                gDfCos(cveEfiscald);
+                gDfCup(cveEfiscald, cveOSd, '');
+                $("#cboOs").attr("disabled", true);
+                $("#cboUp").attr("disabled", false);
+                $("#cboCuadrante").attr("disabled", true);
+                $("#cboCuadranteFin").attr("disabled", true);
+                $("#cboTrimestre").attr("disabled", true);
 
-        getDataProcesoCombo(0, cveOSd, cveUPd, cveEfiscald);
-        gDfCnivelRiesgo(0);
-        gDfCclasificacionRiesgo(0);
-        gDfCimpacto(0);
-        gDfCprobabilidad(0);
-        gDfCcuadrante(0);
-        gDfCimpactoFin(0);
-        gDfCprobabilidadFin(0);
-        gDfCcuadranteFin(0);
-        gDfCestrategia(0);
-        gDfCcontrol(0);
+                getDataProcesoCombo(0, cveOSd, cveUPd, cveEfiscald);
+                gDfCnivelRiesgo(0);
+                gDfCclasificacionRiesgo(0);
+                gDfCimpacto(0);
+                gDfCprobabilidad(0);
+                gDfCcuadrante(0);
+                gDfCimpactoFin(0);
+                gDfCprobabilidadFin(0);
+                gDfCcuadranteFin(0);
+                gDfCestrategia(0);
+                gDfCcontrol(0);
 
-        gDfCalineacion();
-        gDfCclasificacionFactor(0);
-        gDfCcontrolFactor(0);
-        gDfCtipoFactor(0);
-        gDfCtipoControl(0);
-        gDfCdeterminacion(0);
-        gDfCctrl01(0);
-        gDfCctrl02(0);
-        gDfCctrl03(0);
-        gDfCctrl04(0);
+                gDfCalineacion();
+                gDfCclasificacionFactor(0);
+                gDfCcontrolFactor(0);
+                gDfCtipoFactor(0);
+                gDfCtipoControl(0);
+                gDfCdeterminacion(0);
+                gDfCctrl01(0);
+                gDfCctrl02(0);
+                gDfCctrl03(0);
+                gDfCctrl04(0);
 
-        gDr(cveOSd, cveUPd, cveEfiscald);
-        gDfCmeses(0);
-        gDfCresponsable(0, cveOSd, cveUPd);
-        gDfCtrimestre(0);
-        gDch(cveOSd, cveUPd, 'printPage', 'null', 1, cveEfiscald);
-        loadInit(cveOSd, cveUPd, cveEfiscald);
-        //gDriT(cveOSd, cveUPd, cveEfiscald);
-        //gDob(cveOSd, cveUPd, cveEfiscald);
-        settingCount(cveOSd, cveUPd, cveEfiscald);
-        $("#check1").prop('checked', true);
-    } else if (idRolUser === '102' || idRolUser === '103') {
-        logger.log("Usuario administrador")
-    }
-
-    // $(document).on("click", "*", function () {
-    //     console.log("Click detectado en:", this);
-    // });
-
-    $(document).on("click", "#btnSearch", async function () {
-        var cboOS = $("#cboOs").val();
-        var cboUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!await verifyInitialDataOUE(cboOS, cboUP, eFiscal)) {
-            return;
-        }
-        gDr($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-        loadInit($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-        gDch($("#cboOs").val(), $("#cboUp").val(), 'printPage', 'null', 1, $("#cboEfiscal").val());
-        settingCount($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-        getDataProcesoCombo(0, $("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-
-        $("#containerDataRiesgo").html(null);
-        $("#containerDataRiesgo_x_Alineacion").html(null);
-        $("#containerDataFactor").html(null);
-        $("#containerDataFactor_x_Riesgo").html(null);
-        $("#containerDataControl").html(null);
-        $("#containerDataControl_x_Factor").html(null);
-        $("#containerDataAccion").html(null);
-        $("#containerDataAccion_x_Control").html(null);
-        $("#containerDataActividad").html(null);
-        $("#containerDataActividad_x_Accion").html(null);
-        columnAlineacion.show();
-        columnRiesgo.hide();
-        columnFactor.hide();
-        columnControl.hide();
-        columnAccion.hide();
-        $("#check1").prop('checked', true);
-        $("#check2").prop('checked', false);
-        $("#check3").prop('checked', false);
-        $("#check4").prop('checked', false);
-        $("#check5").prop('checked', false);
-        $("#check6").prop('checked', false);
-    });
-
-    $(document).on("change", "#cboUp, #cboEfiscal", async function () {
-        var cboOS = $("#cboOs").val();
-        var cboUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!await verifyInitialDataOUE(cboOS, cboUP, eFiscal)) {
-            return;
-        }
-        gDr($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-        loadInit($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-        gDch($("#cboOs").val(), $("#cboUp").val(), 'printPage', 'null', 1, $("#cboEfiscal").val());
-        settingCount($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-        getDataProcesoCombo(0, $("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-
-        $("#containerDataRiesgo").html(null);
-        $("#containerDataRiesgo_x_Alineacion").html(null);
-        $("#containerDataFactor").html(null);
-        $("#containerDataFactor_x_Riesgo").html(null);
-        $("#containerDataControl").html(null);
-        $("#containerDataControl_x_Factor").html(null);
-        $("#containerDataAccion").html(null);
-        $("#containerDataAccion_x_Control").html(null);
-        $("#containerDataActividad").html(null);
-        $("#containerDataActividad_x_Accion").html(null);
-        columnAlineacion.show();
-        columnRiesgo.hide();
-        columnFactor.hide();
-        columnControl.hide();
-        columnAccion.hide();
-        $("#check1").prop('checked', true);
-        $("#check2").prop('checked', false);
-        $("#check3").prop('checked', false);
-        $("#check4").prop('checked', false);
-        $("#check5").prop('checked', false);
-        $("#check6").prop('checked', false);
-    });
-
-    $(document).on("click", "#btnN_Alineacion, #btnN_Alineacion2", async function () {
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!await verifyInitialDataOUE(cveOS, cveUP, eFiscal)) {
-            return;
-        }
-        clearForms(1);
-        $("#btnS_Alineacion").attr("data-ctrl-alineacion", 0);
-        $("#btnS_Alineacion").attr("data-set-data", 0);
-        gDalCount(cveOS, cveUP, eFiscal);
-
-        $("#modalAlineacionForm").modal("show");
-    });
-
-    $(document).on("click", "#btnS_Alineacion", async function () {
-        $("#btnS_Alineacion").attr("disabled", true);
-        var idInsert = $(this)[0].dataset.setData;
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        if (validarFormularioAlineacion() === true) {
-            var os = $("#cboOs").val();
-            var up = $("#cboUp").val();
-            var _eFiscal = $("#cboEfiscal").val();
-            var efiscal = $("#cboEfiscal").val();
-            if (!await verifyInitialDataOUE(os, up, efiscal)) {
-                return;
+                gDr(cveOSd, cveUPd, cveEfiscald);
+                gDfCmeses(0);
+                gDfCresponsable(0, cveOSd, cveUPd);
+                gDfCtrimestre(0);
+                gDch(cveOSd, cveUPd, 'printPage', 'null', 1, cveEfiscald);
+                loadInit(cveOSd, cveUPd, cveEfiscald);
+                //gDriT(cveOSd, cveUPd, cveEfiscald);
+                //gDob(cveOSd, cveUPd, cveEfiscald);
+                settingCount(cveOSd, cveUPd, cveEfiscald);
+                $("#check1").prop('checked', true);
+            } else if (idRolUser === '102' || idRolUser === '103') {
+                logger.log("Usuario administrador")
             }
-            var idAlineacion = $("#cboAlineacion").val();
-            var txtDesc01 = $("#txtAlineacion").val();
-            var txtNoFolioData = $("#txtNoFolio").val();
 
-            sDal(idAlineacion, txtDesc01, idReturn, os, up, efiscal, txtNoFolioData);
-            gDr(os, up, _eFiscal);
+            $(document).on("click", "#btnSearch", async function () {
+                var cboOS = $("#cboOs").val();
+                var cboUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!await verifyInitialDataOUE(cboOS, cboUP, eFiscal)) {
+                    return;
+                }
+                gDr($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                loadInit($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                gDch($("#cboOs").val(), $("#cboUp").val(), 'printPage', 'null', 1, $("#cboEfiscal").val());
+                settingCount($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                getDataProcesoCombo(0, $("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                gDfCresponsable(0, $("#cboOs").val(), $("#cboUp").val());
 
-            clearForms(1);
-            $("#btnS_Alineacion").removeAttr("disabled");
-            $("#check1").prop('checked', true);
-            $("#check2").prop('checked', false);
-            $("#check3").prop('checked', false);
-            $("#check4").prop('checked', false);
-            $("#check5").prop('checked', false);
-            $("#check6").prop('checked', false);
-        } else {
-            $("#btnS_Alineacion").removeAttr("disabled");
-        }
-        $("#btnS_Alineacion").removeAttr("disabled");
-    });
+                $("#containerDataRiesgo").html(null);
+                $("#containerDataRiesgo_x_Alineacion").html(null);
+                $("#containerDataFactor").html(null);
+                $("#containerDataFactor_x_Riesgo").html(null);
+                $("#containerDataControl").html(null);
+                $("#containerDataControl_x_Factor").html(null);
+                $("#containerDataAccion").html(null);
+                $("#containerDataAccion_x_Control").html(null);
+                $("#containerDataActividad").html(null);
+                $("#containerDataActividad_x_Accion").html(null);
+                columnAlineacion.show();
+                columnRiesgo.hide();
+                columnFactor.hide();
+                columnControl.hide();
+                columnAccion.hide();
+                $("#check1").prop('checked', true);
+                $("#check2").prop('checked', false);
+                $("#check3").prop('checked', false);
+                $("#check4").prop('checked', false);
+                $("#check5").prop('checked', false);
+                $("#check6").prop('checked', false);
+            });
 
-    $(document).on("click", ".btnEditDatosAlineacion", function () {
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        var tipoFin = $(this)[0].dataset.ctrlAlineacion2;
-        $("#modalAlineacionForm").modal("show");
-        gDalById(idReturn);
-        //$("#btnS_Alineacion").attr("data-ctrl-alineacion", `${idReturn}`);
-        $("#btnS_Alineacion").attr("data-set-data", 1);
-    });
+            $(document).on("change", "#cboUp, #cboEfiscal", async function () {
+                var cboOS = $("#cboOs").val();
+                var cboUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!await verifyInitialDataOUE(cboOS, cboUP, eFiscal)) {
+                    return;
+                }
+                gDr($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                loadInit($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                gDch($("#cboOs").val(), $("#cboUp").val(), 'printPage', 'null', 1, $("#cboEfiscal").val());
+                settingCount($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                getDataProcesoCombo(0, $("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
 
-    $(document).on("click", ".btnSeeDatosAlineacion", function () { // VER RIESGO
-        clearForms(2);
-        $("#containerDataRiesgo").html(null);
-        $("#containerDataRiesgo_x_Alineacion").html(null);
-        $("#containerDataFactor").html(null);
-        $("#containerDataFactor_x_Riesgo").html(null);
-        $("#containerDataControl").html(null);
-        $("#containerDataControl_x_Factor").html(null);
-        $("#containerDataAccion").html(null);
-        $("#containerDataAccion_x_Control").html(null);
-        $("#containerDataActividad").html(null);
-        $("#containerDataActividad_x_Accion").html(null);
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        var tipoFin = $(this)[0].dataset.ctrlAlineacion2;
-        $("#btnN_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
-        $("#btnN_Riesgo").attr("data-ctrl_termino", `${tipoFin}`)
-        $("#btnN_Riesgo").attr("data-ctrl-riesgo", 0);
-        $("#btnS_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
-        $("#btnS_Riesgo").attr("data-ctrl_termino", `${tipoFin}`)
-        $("#btnS_Riesgo").attr("data-ctrl-riesgo", 0);
+                $("#containerDataRiesgo").html(null);
+                $("#containerDataRiesgo_x_Alineacion").html(null);
+                $("#containerDataFactor").html(null);
+                $("#containerDataFactor_x_Riesgo").html(null);
+                $("#containerDataControl").html(null);
+                $("#containerDataControl_x_Factor").html(null);
+                $("#containerDataAccion").html(null);
+                $("#containerDataAccion_x_Control").html(null);
+                $("#containerDataActividad").html(null);
+                $("#containerDataActividad_x_Accion").html(null);
+                columnAlineacion.show();
+                columnRiesgo.hide();
+                columnFactor.hide();
+                columnControl.hide();
+                columnAccion.hide();
+                $("#check1").prop('checked', true);
+                $("#check2").prop('checked', false);
+                $("#check3").prop('checked', false);
+                $("#check4").prop('checked', false);
+                $("#check5").prop('checked', false);
+                $("#check6").prop('checked', false);
+            });
 
-        gDri(idReturn);
-        gDalById(idReturn);
-        $("#check1").prop('checked', false);
-        $("#check2").prop('checked', true);
-        columnRiesgo.show();
-    });
+            $(document).on("click", "#btnN_Alineacion, #btnN_Alineacion2", async function () {
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!await verifyInitialDataOUE(cveOS, cveUP, eFiscal)) {
+                    return;
+                }
+                clearForms(1);
+                $("#btnS_Alineacion").attr("data-ctrl-alineacion", 0);
+                $("#btnS_Alineacion").attr("data-set-data", 0);
+                gDalCount(cveOS, cveUP, eFiscal);
 
-    $(document).on("click", "#btnCancel_Alineacion", function () {
-        $("#modalAlineacionForm").modal("hide");
-        clearForms(1);
-    });
+                $("#modalAlineacionForm").modal("show");
+            });
 
-    $(document).on("click", "#btnN_Riesgo", function () {
-        clearForms(2);
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        logger.log(idReturn);
-        var tipoFin = $(this)[0].dataset.ctrlTermino;
-        $("#btnS_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
-        $("#btnS_Riesgo").attr("data-ctrl_termino", `${tipoFin}`)
-        $("#btnS_Riesgo").attr("data-ctrl-riesgo", 0);
-        if (idReturn !== undefined) {
-            $("#modalRiesgoForm").modal("show");
-        } else {
-            showMsg('Necesita elegir primero a que alineación necesita insertar su riesgo.', 'alert');
-            return;
-        }
-    });
-
-    $(document).on("click", "#btnS_Riesgo", function () {
-        $("#btnS_Riesgo").attr("disabled", true);
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        var tipoFin = $(this)[0].dataset.fin;
-        var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
-
-        if (idReturn === 0 || idReturn === "0" || idReturn === null) {
-            showMsg("Ocurrio un error al obtener información extra de la alineación y proceso", 'error');
-            return;
-        }
-
-        if (validarFormularioRiesgo() === true) {
-            const cboProcesoData = $("#cboProceso").val();
-            const cboNivelRiesgoData = $("#cboNivelRiesgo").val();
-            const cboClasRiesgoData = $("#cboClasRiesgo").val();
-            const cboEfiscalData = $("#cboEfiscal").val();
-            const txtOSProcesoData = $("#txtOSProceso").val().trim();
-            const txtUPProcesoData = $("#txtUPProceso").val().trim();
-            const txtRiesgoData = $("#txtRiesgo").val().trim();
-            sDri(cboProcesoData, idReturn, cboNivelRiesgoData, cboClasRiesgoData, cboEfiscalData, txtOSProcesoData, txtUPProcesoData, txtRiesgoData, idCtrlRiesgo);
-            gDalById(idReturn);
-        } else {
-            $("#btnS_Riesgo").removeAttr("disabled");
-        }
-    });
-
-    $(document).on("click", ".btnEditDatosRiesgo", function () {
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        var idRiesgo = $(this)[0].dataset.ctrlRiesgo;
-        $("#btnS_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
-        $("#btnS_Riesgo").attr("data-ctrl-riesgo", idRiesgo);
-
-        gDriById(idReturn);
-        $("#modalRiesgoForm").modal("show");
-    });
-
-    $(document).on("click", ".btnSeeDatosRiesgo", function () { // VER FACTORES
-        clearForms(3);
-        $("#containerDataFactor").html(null);
-        $("#containerDataFactor_x_Riesgo").html(null);
-        $("#containerDataControl").html(null);
-        $("#containerDataControl_x_Factor").html(null);
-        $("#containerDataAccion").html(null);
-        $("#containerDataAccion_x_Control").html(null);
-        $("#containerDataActividad").html(null);
-        $("#containerDataActividad_x_Accion").html(null);
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        $("#btnS_Factor").attr("data-ctrl-riesgo", idReturn);
-        $("#btnN_Factor").attr("data-ctrl-riesgo", idReturn);
-        $("#btnS_Factor").attr("data-ctrl-factor", 0);
-        $("#btnE_ValorInicial").attr("data-ctrl-riesgo", idReturn);
-        $("#btnCancel_Factor").attr("data-ctrl-riesgo", idReturn);
-        gDfa(idReturn);
-        gDriByIdri(idReturn);
-
-        $("#check2").prop('checked', false);
-        $("#check3").prop('checked', true);
-
-        columnFactor.show();
-    });
-
-    $(document).on("click", "#btnCancel_Riesgo", function () {
-        clearForms(2);
-        $("#modalRiesgoForm").modal("hide");
-    });
-
-    $(document).on("click", "#btnN_Factor", function () {
-        clearForms(3);
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        $("#btnS_Factor").attr("data-ctrl-riesgo", idReturn);
-        $("#btnS_Factor").attr("data-ctrl-factor", 0);
-        $("#btnE_ValorInicial").attr("data-ctrl-riesgo", idReturn);
-        $("#btnCancel_Factor").attr("data-ctrl-riesgo", idReturn);
-        gDfa(idReturn);
-        gDriByIdri(idReturn);
-        if (idReturn !== undefined) {
-            $("#modalFactorForm").modal("show");
-        } else {
-            showMsg('Necesita elegir primero a que riesgo necesita insertar sus factores.', 'alert');
-            return;
-        }
-    });
-
-    $(document).on("click", "#btnS_Factor", function () {
-        $("#btnS_Factor").attr("disabled", true);
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        var idCtrlFactor = $(this)[0].dataset.ctrlFactor;
-        if (idReturn === 0 || idReturn === "0" || idReturn === null) {
-            showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
-            return;
-        }
-        if (validarFormularioFactor() === true) {
-            const cboClasFactorData = $("#cboClasFactor").val();
-            //const cboControlFactorData = $("#cboControlFactor").val();
-            const cboTipoFactorData = $("#cboTipoFactor").val();
-            const txtFolioFactorData = $("#txtFolioFactor").val().trim();
-            const txtFactorRiesgoData = $("#txtFactorRiesgo").val().trim();
-            const txtPosibleRiesgoData = $("#txtPosibleRiesgo").val().trim();
-            sDfa(idReturn, cboClasFactorData, cboTipoFactorData, txtFolioFactorData, txtFactorRiesgoData, idCtrlFactor, txtPosibleRiesgoData);
-            $("#btnS_Factor").removeAttr("disabled");
-        } else {
-            $("#btnS_Factor").removeAttr("disabled");
-        }
-    });
-
-    $(document).on("click", ".btnSeeDatosFactor", function () { // VER CONTROLES
-        clearForms(4);
-        $("#containerDataControl").html(null);
-        $("#containerDataControl_x_Factor").html(null);
-        $("#containerDataAccion").html(null);
-        $("#containerDataAccion_x_Control").html(null);
-        $("#containerDataActividad").html(null);
-        $("#containerDataActividad_x_Accion").html(null);
-        var idReturn = $(this)[0].dataset.ctrlFactor;
-        var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
-        var numFolio = $(this)[0].dataset.ctrl1;
-        $("#btnE_ValorFinal").attr("data-ctrl-riesgo", idCtrlRiesgo);
-        $("#btnE_ValorFinal").attr("data-ctrl-factor", idReturn);
-        $("#btnU_Control").attr("data-ctrl-riesgo", idCtrlRiesgo);
-        $("#btnU_Control").attr("data-ctrl-factor", idReturn);
-        $("#btnU_Control").attr("data-ctrl-folio", numFolio);
-        $("#btnN_Control").attr("data-ctrl-riesgo", idCtrlRiesgo);
-        $("#btnN_Control").attr("data-ctrl-factor", idReturn);
-        $("#btnN_Control").attr("data-ctrl-folio", numFolio);
-        $("#btnS_Control").attr("data-ctrl-riesgo", idCtrlRiesgo);
-        $("#btnS_Control").attr("data-ctrl-factor", idReturn);
-        $("#btnS_Control").attr("data-ctrl-folio", numFolio);
-        gDfa(idCtrlRiesgo);
-        gDco(idReturn, numFolio);
-        $("#check3").prop('checked', false);
-        $("#check4").prop('checked', true);
-        columnControl.show();
-    });
-
-    $(document).on("click", ".btnEditDatosFactor", function () {
-        var idReturn = $(this)[0].dataset.ctrlFactor;
-        var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
-        var numFolio = $(this)[0].dataset.ctrl1;
-        $("#btnS_Factor").attr("data-ctrl-factor", idReturn);
-        gDfaById(idReturn, 1);
-        $("#modalFactorForm").modal("show");
-    });
-
-    $(document).on("click", "#btnCancel_Factor", function () {
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        $("#btnS_Factor").attr("data-ctrl-factor", 0);
-        clearForms(3);
-        //gDfa(idReturn);
-        $("#modalFactorForm").modal("hide");
-    });
-
-    $(document).on("click", "#btnE_ValorInicial", async function () {
-        event.preventDefault();
-        const confirm = await alertConfirmMessage('¿Está seguro de insertar los valores iniciales? Si lo hace ya no podrá editar o ingresar registros.');
-        if (!confirm) {
-            return
-        } else {
-            var idReturn = $(this)[0].dataset.ctrlRiesgo;
-            if (idReturn === undefined) {
-                showMsg('Primero registre, su alineación, riesgo, factores. O elija la alineación y siga el proceso.', 'alert');
-                return;
-            }
-            fetchDataArr(56, { _idCtrlRiesgo: idReturn }, 0, function (response) {
-                if (response) {
-                    logger.log("Datos retornados para VALOR INICIAL", response);
-                    if (response !== 'error') {
-                        const algunoFallaFactor = response.some(item => item.NUM_FACTORES === 0);
-
-                        if (algunoFallaFactor) {
-                            showMsg(`Al menos debe de existir un factor para insertar los valores iniciales del riessgo..`, 'info');
-                            return;
-                        } else {
-                            $("#modalVInicialForm").modal("show");
-                            $("#btnUpdateValoresRiesgoInicio").attr("data-ctrl-riesgo", idReturn);
-                        }
-                    } else {
-                        showMsg("Ocurrió un error al obtener los datos.", 'error');
+            $(document).on("click", "#btnS_Alineacion", async function () {
+                $("#btnS_Alineacion").attr("disabled", true);
+                var idInsert = $(this)[0].dataset.setData;
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                if (validarFormularioAlineacion() === true) {
+                    var os = $("#cboOs").val();
+                    var up = $("#cboUp").val();
+                    var _eFiscal = $("#cboEfiscal").val();
+                    var efiscal = $("#cboEfiscal").val();
+                    if (!await verifyInitialDataOUE(os, up, efiscal)) {
                         return;
                     }
+                    var idAlineacion = $("#cboAlineacion").val();
+                    var txtDesc01 = $("#txtAlineacion").val();
+                    var txtNoFolioData = $("#txtNoFolio").val();
+
+                    sDal(idAlineacion, txtDesc01, idReturn, os, up, efiscal, txtNoFolioData);
+                    gDr(os, up, _eFiscal);
+
+                    clearForms(1);
+                    $("#btnS_Alineacion").removeAttr("disabled");
+                    $("#check1").prop('checked', true);
+                    $("#check2").prop('checked', false);
+                    $("#check3").prop('checked', false);
+                    $("#check4").prop('checked', false);
+                    $("#check5").prop('checked', false);
+                    $("#check6").prop('checked', false);
+                } else {
+                    $("#btnS_Alineacion").removeAttr("disabled");
+                }
+                $("#btnS_Alineacion").removeAttr("disabled");
+            });
+
+            $(document).on("click", ".btnEditDatosAlineacion", function () {
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                var tipoFin = $(this)[0].dataset.ctrlAlineacion2;
+                $("#modalAlineacionForm").modal("show");
+                gDalById(idReturn);
+                //$("#btnS_Alineacion").attr("data-ctrl-alineacion", `${idReturn}`);
+                $("#btnS_Alineacion").attr("data-set-data", 1);
+            });
+
+            $(document).on("click", ".btnSeeDatosAlineacion", function () { // VER RIESGO
+                clearForms(2);
+                $("#containerDataRiesgo").html(null);
+                $("#containerDataRiesgo_x_Alineacion").html(null);
+                $("#containerDataFactor").html(null);
+                $("#containerDataFactor_x_Riesgo").html(null);
+                $("#containerDataControl").html(null);
+                $("#containerDataControl_x_Factor").html(null);
+                $("#containerDataAccion").html(null);
+                $("#containerDataAccion_x_Control").html(null);
+                $("#containerDataActividad").html(null);
+                $("#containerDataActividad_x_Accion").html(null);
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                var tipoFin = $(this)[0].dataset.ctrlAlineacion2;
+                $("#btnN_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
+                $("#btnN_Riesgo").attr("data-ctrl_termino", `${tipoFin}`)
+                $("#btnN_Riesgo").attr("data-ctrl-riesgo", 0);
+                $("#btnS_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
+                $("#btnS_Riesgo").attr("data-ctrl_termino", `${tipoFin}`)
+                $("#btnS_Riesgo").attr("data-ctrl-riesgo", 0);
+
+                gDri(idReturn);
+                gDalById(idReturn);
+                $("#check1").prop('checked', false);
+                $("#check2").prop('checked', true);
+                columnRiesgo.show();
+            });
+
+            $(document).on("click", "#btnCancel_Alineacion", function () {
+                $("#modalAlineacionForm").modal("hide");
+                clearForms(1);
+            });
+
+            $(document).on("click", "#btnN_Riesgo", function () {
+                clearForms(2);
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                logger.log(idReturn);
+                var tipoFin = $(this)[0].dataset.ctrlTermino;
+                $("#btnS_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
+                $("#btnS_Riesgo").attr("data-ctrl_termino", `${tipoFin}`)
+                $("#btnS_Riesgo").attr("data-ctrl-riesgo", 0);
+                if (idReturn !== undefined) {
+                    $("#modalRiesgoForm").modal("show");
+                } else {
+                    showMsg('Necesita elegir primero a que alineación necesita insertar su riesgo.', 'alert');
+                    return;
                 }
             });
-        }
-    });
 
-    $(document).on("click", "#btnUpdateValoresRiesgoInicio", function () {
-        $("#btnUpdateValoresRiesgoInicio").attr("disabled", true);
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        if (idReturn !== 0) {
-            if (validarFormularioValoresInicial() === true) {
-                //const txtPosibleRiesgoData = $("#txtPosibleRiesgo").val().trim();
-                const cboImpactoData = $("#cboImpactoInicio").val();
-                const cboProbabilidadData = $("#cboProbabilidadInicio").val();
-                const cboCuadranteData = $("#cboCuadranteInicio").val();
-                uPri(cboImpactoData, cboProbabilidadData, cboCuadranteData, idReturn);
-                $('#modalVInicialForm').modal('hide');
-            }
-            // gDfa(idReturn);
-            // gDriByIdri(idReturn);
-        } else {
-            showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
-            return;
-        }
-    });
+            $(document).on("click", "#btnS_Riesgo", function () {
+                $("#btnS_Riesgo").attr("disabled", true);
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                var tipoFin = $(this)[0].dataset.fin;
+                var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
 
-    $(document).on("click", "#btnN_Control", function () {
-        clearForms(4);
-        var idReturn = $(this)[0].dataset.ctrlFactor;
-        var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
-        var numFolio = $(this)[0].dataset.ctrlFolio;
-        $("#btnS_Control").attr("data-ctrl-factor", idReturn);
-        $("#btnS_Control").attr("data-ctrl-control", 0);
-        gDfa(idCtrlRiesgo);
-        gDco(idReturn, numFolio);
-        if (idReturn !== undefined) {
-            $("#modalControlForm").modal("show");
-        } else {
-            showMsg('Necesita elegir primero a que factor necesita insertar sus controles.', 'alert');
-            return;
-        }
-    });
+                if (idReturn === 0 || idReturn === "0" || idReturn === null) {
+                    showMsg("Ocurrio un error al obtener información extra de la alineación y proceso", 'error');
+                    return;
+                }
 
-    $(document).on("click", "#btnS_Control", function () {
-        $("#btnS_Control").attr("disabled", true);
-        var idReturn = $(this)[0].dataset.ctrlFactor;
-        var idCtrlControl = $(this)[0].dataset.ctrlControl;
+                if (validarFormularioRiesgo() === true) {
+                    const cboProcesoData = $("#cboProceso").val();
+                    const cboNivelRiesgoData = $("#cboNivelRiesgo").val();
+                    const cboClasRiesgoData = $("#cboClasRiesgo").val();
+                    const cboEfiscalData = $("#cboEfiscal").val();
+                    const txtOSProcesoData = $("#txtOSProceso").val().trim();
+                    const txtUPProcesoData = $("#txtUPProceso").val().trim();
+                    const txtRiesgoData = $("#txtRiesgo").val().trim();
+                    sDri(cboProcesoData, idReturn, cboNivelRiesgoData, cboClasRiesgoData, cboEfiscalData, txtOSProcesoData, txtUPProcesoData, txtRiesgoData, idCtrlRiesgo);
+                    gDalById(idReturn);
+                } else {
+                    $("#btnS_Riesgo").removeAttr("disabled");
+                }
+            });
 
-        if (idReturn === 0 || idReturn === "0" || idReturn === null) {
-            showMsg("Ocurrio un error al obtener información extra del factor", 'error');
-            return;
-        }
+            $(document).on("click", ".btnEditDatosRiesgo", function () {
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                var idRiesgo = $(this)[0].dataset.ctrlRiesgo;
+                $("#btnS_Riesgo").attr("data-ctrl-alineacion", `${idReturn}`)
+                $("#btnS_Riesgo").attr("data-ctrl-riesgo", idRiesgo);
 
-        if (validarFormularioControl() === true) {
-            const cboTipoControlData = $("#cboTipoControl").val();
-            const cboDeterminacionData = $("#cboDeterminacion").val();
-            const cboControlDocumentadoData = $("#cboControlDocumentado").val();
-            const cboControlFormalizadoData = $("#cboControlFormalizado").val();
-            const cboControlAplicaData = $("#cboControlAplica").val();
-            const cboControlEfectivoData = $("#cboControlEfectivo").val();
-            const txtFolioControlFactorData = $("#txtFolioControlFactor").val().trim();
-            const txtDescControlFactorData = $("#txtDescControlFactor").val().trim();
-            sDco(idReturn, cboTipoControlData, cboDeterminacionData, cboControlDocumentadoData, cboControlFormalizadoData, cboControlAplicaData, cboControlEfectivoData, txtFolioControlFactorData, txtDescControlFactorData, idCtrlControl);
-        } else {
-            $("#btnS_Control").removeAttr("disabled");
-        }
-        $("#btnS_Control").attr("data-ctrl-control", 0);
-    });
+                gDriById(idReturn);
+                $("#modalRiesgoForm").modal("show");
+            });
 
-    $(document).on("click", ".btnSeeDatosControl", function () { // VER ACCION
-        clearForms(4);
-        clearForms(5);
-        $("#containerDataAccion").html(null);
-        $("#containerDataAccion_x_Control").html(null);
-        $("#containerDataActividad").html(null);
-        $("#containerDataActividad_x_Accion").html(null);
-        var idReturn = $(this)[0].dataset.ctrlControl;
-        var idCtrlFactor = $(this)[0].dataset.ctrlFactor;
-        var numFolio = $(this)[0].dataset.ctrl1;
-        $("#btnN_Accion").attr("data-ctrl-control", idReturn);
-        $("#btnN_Accion").attr("data-ctrl-accion", 0);
-        $("#btnS_AccionXRiesgo").attr("data-ctrl-control", idReturn);
-        $("#btnS_AccionXRiesgo").attr("data-ctrl-accion", 0);
-        gDac(idReturn);
-        gDco(idCtrlFactor, numFolio.substring(0, 6));
-        $("#check4").prop('checked', false);
-        $("#check5").prop('checked', true);
-        columnAccion.show();
-    });
+            $(document).on("click", ".btnSeeDatosRiesgo", function () { // VER FACTORES
+                clearForms(3);
+                $("#containerDataFactor").html(null);
+                $("#containerDataFactor_x_Riesgo").html(null);
+                $("#containerDataControl").html(null);
+                $("#containerDataControl_x_Factor").html(null);
+                $("#containerDataAccion").html(null);
+                $("#containerDataAccion_x_Control").html(null);
+                $("#containerDataActividad").html(null);
+                $("#containerDataActividad_x_Accion").html(null);
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                $("#btnS_Factor").attr("data-ctrl-riesgo", idReturn);
+                $("#btnN_Factor").attr("data-ctrl-riesgo", idReturn);
+                $("#btnS_Factor").attr("data-ctrl-factor", 0);
+                $("#btnE_ValorInicial").attr("data-ctrl-riesgo", idReturn);
+                $("#btnCancel_Factor").attr("data-ctrl-riesgo", idReturn);
+                gDfa(idReturn);
+                gDriByIdri(idReturn);
 
-    $(document).on("click", ".btnEditDatosControl", function () {
-        var idReturn = $(this)[0].dataset.ctrlControl;
-        var idCtrlFactor = $(this)[0].dataset.ctrlFactor;
-        var numFolio = $(this)[0].dataset.ctrl1;
-        $("#btnS_Control").attr("data-ctrl-control", idReturn);
-        $("#btnS_Control").attr("data-ctrl-factor", idCtrlFactor);
-        gDcoById(idReturn, 1);
-        //gDco(idCtrlFactor, numFolio.substring(0, 6));
-        $("#modalControlForm").modal("show");
-    });
+                $("#check2").prop('checked', false);
+                $("#check3").prop('checked', true);
 
-    $(document).on("click", "#btnCancel_Control", function () {
-        $("#btnS_Control").attr("data-ctrl-control", 0);
-        const txtFolioControlFactorData = $("#txtFolioControlFactor").val().trim();
-        var idReturn = $(this)[0].dataset.ctrl1;
-        clearForms(4);
-        //gDco(idReturn, txtFolioControlFactorData.substring(0, 6));
-        $("#modalControlForm").modal("hide");
-    });
+                columnFactor.show();
+            });
 
-    $(document).on("click", "#btnE_ValorFinal", async function () {
-        const confirm = await alertConfirmMessage('¿Está seguro de insertar los valores finales? Si lo hace ya no podrá editar o ingresar registros.');
-        if (!confirm) {
-            return
-        } else {
-            var idReturn = $(this)[0].dataset.ctrlRiesgo;
-            var idReturn2 = $(this)[0].dataset.ctrlFactor;
-            $("#btnUpdateValoresRiesgoFin").attr("data-ctrl-riesgo", idReturn);
-            $("#btnUpdateValoresRiesgoFin").attr("data-ctrl-factor", idReturn2);
-            if (idReturn === undefined) {
-                showMsg('Primero registre, su alineación, riesgo, factor y controles. O elija la alineación y siga el proceso.', 'alert');
-                return;
-            }
-            fetchDataArr(48, { _idCtrlRiesgo: idReturn }, 0, function (response) {
-                if (response) {
-                    logger.log("Datos recibidos a RIESGO BY ID (RIESGO):", response);
-                    if (response !== 'error') {
-                        if (response[0].ID_CONTROL === null || response[0].ID_CONTROL === '0') {
-                            showMsg('Defina primero si su riesgo esta controlado.', 'error');
-                            return;
-                        } else {
-                            fetchDataArr(50, { _idCtrlRiesgo: idReturn }, 0, function (response) {
-                                if (response) {
-                                    logger.warn("Datos devueltos sobre VALOR INICIAL", response)
-                                    if (response !== 'error') {
-                                        const algunoFalla = response.some(item => item.PASA_ === 0);
-                                        if (algunoFalla) {
-                                            const foliosFallidos = response.filter(item => item.PASA_ === 0).map(item => item.FOLIO).join(', ');
-                                            showMsg(`Los siguientes factores no cumplen: ${foliosFallidos}. Favor de insertar los controles para este factor`, 'warning');
-                                        } else {
-                                            const idImpacto = response.filter(item => item.PASA_ === 1).map(item => item.ID_IMPACTO);
-                                            const idProbabilidad = response.filter(item => item.PASA_ === 1).map(item => item.ID_PROBABILIDAD);
-                                            fetchDataArr(48, { _idCtrlRiesgo: idReturn }, 0, function (response) {
-                                                if (response) {
-                                                    logger.warn("Datos recibidos a RIESGO BY ID (RIESGO):", response);
-                                                    if (response !== 'error') {
-                                                        if (response.length === 1) {
-                                                            $("#impactoLocal").text(response[0].ID_IMPACTO);
-                                                            $("#probabilidadLocal").text(response[0].ID_PROBABILIDAD);
-                                                            $("#modalVFinForm").modal("show");
+            $(document).on("click", "#btnCancel_Riesgo", function () {
+                clearForms(2);
+                $("#modalRiesgoForm").modal("hide");
+            });
+
+            $(document).on("click", "#btnN_Factor", function () {
+                clearForms(3);
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                $("#btnS_Factor").attr("data-ctrl-riesgo", idReturn);
+                $("#btnS_Factor").attr("data-ctrl-factor", 0);
+                $("#btnE_ValorInicial").attr("data-ctrl-riesgo", idReturn);
+                $("#btnCancel_Factor").attr("data-ctrl-riesgo", idReturn);
+                gDfa(idReturn);
+                gDriByIdri(idReturn);
+                if (idReturn !== undefined) {
+                    $("#modalFactorForm").modal("show");
+                } else {
+                    showMsg('Necesita elegir primero a que riesgo necesita insertar sus factores.', 'alert');
+                    return;
+                }
+            });
+
+            $(document).on("click", "#btnS_Factor", function () {
+                $("#btnS_Factor").attr("disabled", true);
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                var idCtrlFactor = $(this)[0].dataset.ctrlFactor;
+                if (idReturn === 0 || idReturn === "0" || idReturn === null) {
+                    showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
+                    return;
+                }
+                if (validarFormularioFactor() === true) {
+                    const cboClasFactorData = $("#cboClasFactor").val();
+                    //const cboControlFactorData = $("#cboControlFactor").val();
+                    const cboTipoFactorData = $("#cboTipoFactor").val();
+                    const txtFolioFactorData = $("#txtFolioFactor").val().trim();
+                    const txtFactorRiesgoData = $("#txtFactorRiesgo").val().trim();
+                    const txtPosibleRiesgoData = $("#txtPosibleRiesgo").val().trim();
+                    sDfa(idReturn, cboClasFactorData, cboTipoFactorData, txtFolioFactorData, txtFactorRiesgoData, idCtrlFactor, txtPosibleRiesgoData);
+                    $("#btnS_Factor").removeAttr("disabled");
+                } else {
+                    $("#btnS_Factor").removeAttr("disabled");
+                }
+            });
+
+            $(document).on("click", ".btnSeeDatosFactor", function () { // VER CONTROLES
+                clearForms(4);
+                $("#containerDataControl").html(null);
+                $("#containerDataControl_x_Factor").html(null);
+                $("#containerDataAccion").html(null);
+                $("#containerDataAccion_x_Control").html(null);
+                $("#containerDataActividad").html(null);
+                $("#containerDataActividad_x_Accion").html(null);
+                var idReturn = $(this)[0].dataset.ctrlFactor;
+                var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
+                var numFolio = $(this)[0].dataset.ctrl1;
+                $("#btnE_ValorFinal").attr("data-ctrl-riesgo", idCtrlRiesgo);
+                $("#btnE_ValorFinal").attr("data-ctrl-factor", idReturn);
+                $("#btnU_Control").attr("data-ctrl-riesgo", idCtrlRiesgo);
+                $("#btnU_Control").attr("data-ctrl-factor", idReturn);
+                $("#btnU_Control").attr("data-ctrl-folio", numFolio);
+                $("#btnN_Control").attr("data-ctrl-riesgo", idCtrlRiesgo);
+                $("#btnN_Control").attr("data-ctrl-factor", idReturn);
+                $("#btnN_Control").attr("data-ctrl-folio", numFolio);
+                $("#btnS_Control").attr("data-ctrl-riesgo", idCtrlRiesgo);
+                $("#btnS_Control").attr("data-ctrl-factor", idReturn);
+                $("#btnS_Control").attr("data-ctrl-folio", numFolio);
+                gDfa(idCtrlRiesgo);
+                gDco(idReturn, numFolio);
+                $("#check3").prop('checked', false);
+                $("#check4").prop('checked', true);
+                columnControl.show();
+            });
+
+            $(document).on("click", ".btnEditDatosFactor", function () {
+                var idReturn = $(this)[0].dataset.ctrlFactor;
+                var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
+                var numFolio = $(this)[0].dataset.ctrl1;
+                $("#btnS_Factor").attr("data-ctrl-factor", idReturn);
+                gDfaById(idReturn, 1);
+                $("#modalFactorForm").modal("show");
+            });
+
+            $(document).on("click", "#btnCancel_Factor", function () {
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                $("#btnS_Factor").attr("data-ctrl-factor", 0);
+                clearForms(3);
+                //gDfa(idReturn);
+                $("#modalFactorForm").modal("hide");
+            });
+
+            $(document).on("click", "#btnE_ValorInicial", async function () {
+                event.preventDefault();
+                const confirm = await alertConfirmMessage('¿Está seguro de insertar los valores iniciales? Si lo hace ya no podrá editar o ingresar registros.');
+                if (!confirm) {
+                    return
+                } else {
+                    var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                    if (idReturn === undefined) {
+                        showMsg('Primero registre, su alineación, riesgo, factores. O elija la alineación y siga el proceso.', 'alert');
+                        return;
+                    }
+                    fetchDataArr(56, { _idCtrlRiesgo: idReturn }, 0, function (response) {
+                        if (response) {
+                            logger.log("Datos retornados para VALOR INICIAL", response);
+                            if (response !== 'error') {
+                                const algunoFallaFactor = response.some(item => item.NUM_FACTORES === 0);
+
+                                if (algunoFallaFactor) {
+                                    showMsg(`Al menos debe de existir un factor para insertar los valores iniciales del riessgo..`, 'info');
+                                    return;
+                                } else {
+                                    $("#modalVInicialForm").modal("show");
+                                    $("#btnUpdateValoresRiesgoInicio").attr("data-ctrl-riesgo", idReturn);
+                                }
+                            } else {
+                                showMsg("Ocurrió un error al obtener los datos.", 'error');
+                                return;
+                            }
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "#btnUpdateValoresRiesgoInicio", function () {
+                $("#btnUpdateValoresRiesgoInicio").attr("disabled", true);
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                if (idReturn !== 0) {
+                    if (validarFormularioValoresInicial() === true) {
+                        //const txtPosibleRiesgoData = $("#txtPosibleRiesgo").val().trim();
+                        const cboImpactoData = $("#cboImpactoInicio").val();
+                        const cboProbabilidadData = $("#cboProbabilidadInicio").val();
+                        const cboCuadranteData = $("#cboCuadranteInicio").val();
+                        uPri(cboImpactoData, cboProbabilidadData, cboCuadranteData, idReturn);
+                        $('#modalVInicialForm').modal('hide');
+                    }
+                    // gDfa(idReturn);
+                    // gDriByIdri(idReturn);
+                } else {
+                    showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
+                    return;
+                }
+            });
+
+            $(document).on("click", "#btnN_Control", function () {
+                clearForms(4);
+                var idReturn = $(this)[0].dataset.ctrlFactor;
+                var idCtrlRiesgo = $(this)[0].dataset.ctrlRiesgo;
+                var numFolio = $(this)[0].dataset.ctrlFolio;
+                $("#btnS_Control").attr("data-ctrl-factor", idReturn);
+                $("#btnS_Control").attr("data-ctrl-control", 0);
+                gDfa(idCtrlRiesgo);
+                gDco(idReturn, numFolio);
+                if (idReturn !== undefined) {
+                    $("#modalControlForm").modal("show");
+                } else {
+                    showMsg('Necesita elegir primero a que factor necesita insertar sus controles.', 'alert');
+                    return;
+                }
+            });
+
+            $(document).on("click", "#btnS_Control", function () {
+                $("#btnS_Control").attr("disabled", true);
+                var idReturn = $(this)[0].dataset.ctrlFactor;
+                var idCtrlControl = $(this)[0].dataset.ctrlControl;
+
+                if (idReturn === 0 || idReturn === "0" || idReturn === null) {
+                    showMsg("Ocurrio un error al obtener información extra del factor", 'error');
+                    return;
+                }
+
+                if (validarFormularioControl() === true) {
+                    const cboTipoControlData = $("#cboTipoControl").val();
+                    const cboDeterminacionData = $("#cboDeterminacion").val();
+                    const cboControlDocumentadoData = $("#cboControlDocumentado").val();
+                    const cboControlFormalizadoData = $("#cboControlFormalizado").val();
+                    const cboControlAplicaData = $("#cboControlAplica").val();
+                    const cboControlEfectivoData = $("#cboControlEfectivo").val();
+                    const txtFolioControlFactorData = $("#txtFolioControlFactor").val().trim();
+                    const txtDescControlFactorData = $("#txtDescControlFactor").val().trim();
+                    sDco(idReturn, cboTipoControlData, cboDeterminacionData, cboControlDocumentadoData, cboControlFormalizadoData, cboControlAplicaData, cboControlEfectivoData, txtFolioControlFactorData, txtDescControlFactorData, idCtrlControl);
+                } else {
+                    $("#btnS_Control").removeAttr("disabled");
+                }
+                $("#btnS_Control").attr("data-ctrl-control", 0);
+            });
+
+            $(document).on("click", ".btnSeeDatosControl", function () { // VER ACCION
+                clearForms(4);
+                clearForms(5);
+                $("#containerDataAccion").html(null);
+                $("#containerDataAccion_x_Control").html(null);
+                $("#containerDataActividad").html(null);
+                $("#containerDataActividad_x_Accion").html(null);
+                var idReturn = $(this)[0].dataset.ctrlControl;
+                var idCtrlFactor = $(this)[0].dataset.ctrlFactor;
+                var numFolio = $(this)[0].dataset.ctrl1;
+                $("#btnN_Accion").attr("data-ctrl-control", idReturn);
+                $("#btnN_Accion").attr("data-ctrl-accion", 0);
+                $("#btnS_AccionXRiesgo").attr("data-ctrl-control", idReturn);
+                $("#btnS_AccionXRiesgo").attr("data-ctrl-accion", 0);
+                gDac(idReturn);
+                gDco(idCtrlFactor, numFolio.substring(0, 6));
+                $("#check4").prop('checked', false);
+                $("#check5").prop('checked', true);
+                columnAccion.show();
+            });
+
+            $(document).on("click", ".btnEditDatosControl", function () {
+                var idReturn = $(this)[0].dataset.ctrlControl;
+                var idCtrlFactor = $(this)[0].dataset.ctrlFactor;
+                var numFolio = $(this)[0].dataset.ctrl1;
+                $("#btnS_Control").attr("data-ctrl-control", idReturn);
+                $("#btnS_Control").attr("data-ctrl-factor", idCtrlFactor);
+                gDcoById(idReturn, 1);
+                //gDco(idCtrlFactor, numFolio.substring(0, 6));
+                $("#modalControlForm").modal("show");
+            });
+
+            $(document).on("click", "#btnCancel_Control", function () {
+                $("#btnS_Control").attr("data-ctrl-control", 0);
+                const txtFolioControlFactorData = $("#txtFolioControlFactor").val().trim();
+                var idReturn = $(this)[0].dataset.ctrl1;
+                clearForms(4);
+                //gDco(idReturn, txtFolioControlFactorData.substring(0, 6));
+                $("#modalControlForm").modal("hide");
+            });
+
+            $(document).on("click", "#btnE_ValorFinal", async function () {
+                const confirm = await alertConfirmMessage('¿Está seguro de insertar los valores finales? Si lo hace ya no podrá editar o ingresar registros.');
+                if (!confirm) {
+                    return
+                } else {
+                    var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                    var idReturn2 = $(this)[0].dataset.ctrlFactor;
+                    $("#btnUpdateValoresRiesgoFin").attr("data-ctrl-riesgo", idReturn);
+                    $("#btnUpdateValoresRiesgoFin").attr("data-ctrl-factor", idReturn2);
+                    if (idReturn === undefined) {
+                        showMsg('Primero registre, su alineación, riesgo, factor y controles. O elija la alineación y siga el proceso.', 'alert');
+                        return;
+                    }
+                    fetchDataArr(48, { _idCtrlRiesgo: idReturn }, 0, function (response) {
+                        if (response) {
+                            logger.log("Datos recibidos a RIESGO BY ID (RIESGO):", response);
+                            if (response !== 'error') {
+                                if (response[0].ID_CONTROL === null || response[0].ID_CONTROL === '0') {
+                                    showMsg('Defina primero si su riesgo esta controlado.', 'error');
+                                    return;
+                                } else {
+                                    fetchDataArr(50, { _idCtrlRiesgo: idReturn }, 0, function (response) {
+                                        if (response) {
+                                            logger.warn("Datos devueltos sobre VALOR INICIAL", response)
+                                            if (response !== 'error') {
+                                                const algunoFalla = response.some(item => item.PASA_ === 0);
+                                                if (algunoFalla) {
+                                                    const foliosFallidos = response.filter(item => item.PASA_ === 0).map(item => item.FOLIO).join(', ');
+                                                    showMsg(`Los siguientes factores no cumplen: ${foliosFallidos}. Favor de insertar los controles para este factor`, 'warning');
+                                                } else {
+                                                    const idImpacto = response.filter(item => item.PASA_ === 1).map(item => item.ID_IMPACTO);
+                                                    const idProbabilidad = response.filter(item => item.PASA_ === 1).map(item => item.ID_PROBABILIDAD);
+                                                    fetchDataArr(48, { _idCtrlRiesgo: idReturn }, 0, function (response) {
+                                                        if (response) {
+                                                            logger.warn("Datos recibidos a RIESGO BY ID (RIESGO):", response);
+                                                            if (response !== 'error') {
+                                                                if (response.length === 1) {
+                                                                    $("#impactoLocal").text(response[0].ID_IMPACTO);
+                                                                    $("#probabilidadLocal").text(response[0].ID_PROBABILIDAD);
+                                                                    $("#modalVFinForm").modal("show");
+                                                                }
+                                                            }
                                                         }
+                                                    });
+                                                }
+                                            } else {
+                                                showMsg("Ocurrió un error al mostrar resultados.", 'error');
+                                            }
+                                        } else if (response === "error") {
+                                            showMsg("Error al cargar datos", 'error');
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "#btnUpdateValoresRiesgoFin", function () {
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                var idReturn2 = $(this)[0].dataset.ctrlFactor;
+                if (idReturn !== 0) {
+                    if (validarFormularioValoresFinal() === true) {
+                        //const cboControlData = $("#cboControl").val();
+                        const cboImpactoFinData = $("#cboImpactoFin").val();
+                        const cboProbabilidadFinData = $("#cboProbabilidadFin").val();
+                        const cboCuadranteFinData = $("#cboCuadranteFin").val();
+                        //const cboEstrategiaData = $("#cboEstrategia").val();
+                        const txtFolioControlFactorData = $("#txtFolioControlFactor").val().trim();
+                        uPri2(cboImpactoFinData, cboProbabilidadFinData, cboCuadranteFinData, idReturn);
+                        $('#modalVFinForm').modal('hide');
+                        // gDfa(idReturn);
+                        gDco(idReturn2, txtFolioControlFactorData.substring(0, 6));
+                    }
+                } else {
+                    showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
+                    return;
+                }
+            });
+
+            $(document).on("click", "#btnN_Accion", function () {
+                clearForms(5);
+                var idReturn = $(this)[0].dataset.ctrlControl;
+                var idAccion = $(this)[0].dataset.ctrlAccion;
+                $("#btnS_Accion").attr("data-ctrl-control", idReturn);
+                $("#btnS_Accion").attr("data-ctrl-accion", 0);
+                gDac(idReturn);
+                if (idReturn !== undefined) {
+                    $("#modalAccionForm").modal("show");
+                } else {
+                    showMsg('Necesita elegir primero a que control necesita insertar su acción.', 'alert');
+                    return;
+                }
+            });
+
+            $(document).on("click", "#btnS_Accion", function () {
+                $("#btnS_Accion").attr("disabled", true);
+                var idReturn = $(this)[0].dataset.ctrlControl;
+                var idCtrlAccion = $(this)[0].dataset.ctrlAccion;
+                if (idReturn === 0 || idReturn === "0" || idReturn === null) {
+                    showMsg("Ocurrio un error al obtener información extra del factor", 'error');
+                    return;
+                }
+                if (validarFormularioAccion() === true) {
+                    const txtDescAccionData = $("#txtDescAccion").val().trim();
+                    sDac(idReturn, txtDescAccionData, idCtrlAccion);
+                    $("#btnS_Accion").removeAttr("disabled");
+                } else {
+                    $("#btnS_Accion").removeAttr("disabled");
+                }
+            });
+
+            $(document).on("click", ".btnSeeDatosAccion", async function () { // VER ACTIVIDADES
+                clearForms(6);
+                $("#containerDataActividad").html(null);
+                $("#containerDataActividad_x_Accion").html(null);
+                var cboOS = $("#cboOs").val();
+                var cboUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!await verifyInitialDataOUE(cboOS, cboUP, eFiscal)) {
+                    return;
+                }
+                var idReturn = $(this)[0].dataset.ctrlAccion;
+                var numeroControlAccion = $(this)[0].dataset.ctrlNoControl;
+                gDact(idReturn, numeroControlAccion);
+                gDfCresponsable(0, cboOS, cboUP);
+                $("#btnS_Actividad").attr("data-ctrl-actividad", 0);
+                $("#btnS_Actividad").attr("data-ctrl-accion", idReturn);
+                $("#btnN_Actividad").attr("data-ctrl-accion", idReturn);
+                $("#btnN_Actividad").attr("data-ctrl-no-control", numeroControlAccion);
+                $("#check5").prop('checked', false);
+                $("#check6").prop('checked', true);
+                columnActividad.show();
+            });
+
+            $(document).on("click", ".btnEditDatosAccion", function () {
+                var idCtrlAccion = $(this)[0].dataset.ctrlAccion;
+                var idCtrlControl = $(this)[0].dataset.ctrlControl;
+                var numeroControlAccion = $(this)[0].dataset.ctrlNoControl;
+                $("#btnS_Accion").attr("data-ctrl-accion", idCtrlAccion);
+                $("#btnS_Accion").attr("data-ctrl-control", idCtrlControl);
+                //gDac(idCtrlControl);
+                gDacById(idCtrlAccion, 1);
+                $("#btnS_Accion").removeAttr("disabled");
+                $("#modalAccionForm").modal("show");
+            });
+
+            $(document).on("click", "#btnCancel_Accion", function () {
+                var idReturn = $(this)[0].dataset.ctrlControl;
+                $("#btnS_Accion").attr("data-ctrl-accion", 0);
+                $("#btnS_Accion").attr("data-ctrl-control", idReturn);
+                clearForms(5);
+                //gDac(idReturn);
+                $("#modalAccionForm").modal("hide");
+            });
+
+            $(document).on("click", "#btnN_Actividad", function () {
+                clearForms(6);
+                var idReturn = $(this)[0].dataset.ctrlAccion;
+                var numeroControlAccion = $(this)[0].dataset.ctrlNoControl;
+                gDact(idReturn, numeroControlAccion);
+                $("#btnS_Actividad").attr("data-ctrl-actividad", 0);
+                $("#btnS_Actividad").attr("data-ctrl-no-actividad", numeroControlAccion);
+                $("#btnCancel_Actividad").attr("data-ctrl-no-actividad", numeroControlAccion);
+                if (idReturn !== undefined) {
+                    $("#modalActividadForm").modal("show");
+                    $("#divInsertMeta").show();
+                    $("#divUpdateMeta").hide();
+                } else {
+                    showMsg('Necesita elegir primero a que acción necesita insertar sus actividades.', 'alert');
+                    return;
+                }
+            });
+
+            $(document).on("click", "#btnS_Actividad", function () {
+                const valores = obtenerValores();
+                $("#btnS_Actividad").attr("disabled", true);
+                var idReturn = $(this)[0].dataset.ctrlAccion;
+                var idCtrlActividad = $(this)[0].dataset.ctrlActividad;
+                if (idReturn === 0 || idReturn === "0" || idReturn === null) {
+                    showMsg("Ocurrio un error al obtener información extra de la acción", 'error');
+                    return;
+                }
+                if (validarFormularioActividad() === true) {
+                    if (idCtrlActividad === "0") {
+                        if (!validarTextboxes()) {
+                            $("#btnS_Actividad").removeAttr("disabled");
+                            return;
+                        }
+                        //const txtResponsableActividadData = $("#txtResponsableActividad").val().trim();
+                        const cboResponsableData = $("#cboResponsable").val();
+                        const listMesData = $("#cboMes2").val();
+                        //const cboMesData = $("#cboMes").val();
+                        const txtDescActividadData = $("#txtDescActividad").val().trim();
+                        //const cboTrimestreData = $("#cboTrimestre").val();
+                        const txtNoActividadData = $("#txtNoActividad").val().trim();
+                        const txtNoMetaData = $("#txtNoMeta").val().trim();
+                        const txtEvidenciaData = $("#txtEvidencia").val().trim();
+                        const valoresMeses = JSON.stringify(valores);
+                        //const cboTipoReporteData = $("#cboTipoReporte").val();
+                        //sDact(idReturn, cboResponsableData, txtDescActividadData, cboTrimestreData, cboMesData, idCtrlActividad, txtNoActividadData);
+                        //sDact(idReturn, cboResponsableData, txtDescActividadData, listMesData, idCtrlActividad, txtNoActividadData, 0, txtNoMetaData, txtEvidenciaData);
+                        sDact(idReturn, cboResponsableData, txtDescActividadData, valoresMeses, idCtrlActividad, txtNoActividadData, 0, txtNoMetaData, txtEvidenciaData);
+                        $("#btnS_Actividad").removeAttr("disabled");
+                        gDact(idReturn, txtNoActividadData.substring(0, 8));
+                    } else if (idCtrlActividad !== "0") {
+                        //const txtResponsableActividadData = $("#txtResponsableActividad").val().trim();
+                        const cboResponsableData = $("#cboResponsable").val();
+                        const listMesData = $("#cboMes2").val();
+                        //const cboMesData = $("#cboMes").val();
+                        const txtDescActividadData = $("#txtDescActividad").val().trim();
+                        //const cboTrimestreData = $("#cboTrimestre").val();
+                        const txtNoActividadData = $("#txtNoActividad").val().trim();
+                        const txtNoMetaData = $("#txtNoMeta").val().trim();
+                        const txtEvidenciaData = $("#txtEvidencia").val().trim();
+                        //const cboTipoReporteData = $("#cboTipoReporte").val();
+                        sDact(idReturn, cboResponsableData, txtDescActividadData, listMesData, idCtrlActividad, txtNoActividadData, 1, txtNoMetaData, txtEvidenciaData);
+                        $("#btnS_Actividad").removeAttr("disabled");
+                        gDact(idReturn, txtNoActividadData.substring(0, 8));
+                    }
+                } else {
+                    $("#btnS_Actividad").removeAttr("disabled");
+                }
+            });
+
+            $(document).on("click", ".btnEditDatosActividad", function () {
+                var idCtrlActividad = $(this)[0].dataset.ctrlActividad;
+                var idCtrlAccion = $(this)[0].dataset.ctrlAccion;
+                var ctrlNoActividad = $(this)[0].dataset.ctrlNoActividad;
+                $("#btnS_Actividad").attr("data-ctrl-actividad", idCtrlActividad);
+                $("#btnCancel_Actividad").attr("data-ctrl-no-actividad", ctrlNoActividad);
+                //gDact(idCtrlAccion, ctrlNoActividad.substring(8));
+                gDactById(idCtrlActividad, 1);
+                $("#modalActividadForm").modal("show");
+                $("#divInsertMeta").hide();
+                $("#divUpdateMeta").show();
+            });
+
+            $(document).on("click", "#btnCancel_Actividad", function () {
+                var idReturn = $(this)[0].dataset.ctrlAccion;
+                var ctrlNoActividad = $(this)[0].dataset.ctrlNoActividad;
+                $("#btnS_Actividad").attr("data-ctrl-actividad", 0);
+                clearForms(6);
+                //gDact(idReturn, ctrlNoActividad.substring(0, 8));
+                $("#modalActividadForm").modal("hide");
+            });
+
+            $(document).on("change", "#cboImpactoFin", function () {
+                var selectedValue = $(this).val();
+                logger.info(parseInt($("#impactoLocal").text()));
+                if (parseInt($("#impactoLocal").text()) > selectedValue) {
+                    showMsg("No puede ingresar un valor de impacto menor al inicial", 'error');
+                    $(this).val(0);
+                }
+            });
+
+            $(document).on("change", "#cboProbabilidadFin", function () {
+                var selectedValue = $(this).val();
+                logger.info(parseInt($("#probabilidadLocal").text()));
+                if (parseInt($("#probabilidadLocal").text()) > selectedValue) {
+                    showMsg("No puede ingresar un valor de probabilidad menor al inicial", 'error');
+                    $(this).val(0);
+                }
+            });
+
+            $(document).on("change", "#cboEfiscal", function () {
+                var selectedValue = $(this).val();
+                gDfCos(selectedValue)
+            });
+
+            $(document).on("change", "#cboOs", function () {
+                var selectedValue = $(this).val();
+                gDfCup(cveEfiscald, selectedValue, 'cambio')
+            });
+
+            $(document).on("change", "#cboProceso", function () {
+                var selectedValue = $(this).val();
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                const initialOk = verifyInitialDataOUE(cveOS, cveUP, eFiscal);
+                if (!initialOk) return;
+                if (selectedValue === undefined || selectedValue === "") {
+                    $("#txtOSProceso").val("");
+                    $("#txtUPProceso").val("");
+                } else if (selectedValue === 0 || selectedValue === "0") {
+                    $("#txtOSProceso").val(cveOS);
+                    $("#txtUPProceso").val(cveUP);
+                } else {
+                    gDpr(selectedValue, cveOS, cveUP, eFiscal);
+                }
+            });
+
+            $(document).on("change", "#cboImpactoInicio, #cboProbabilidadInicio, #cboImpactoFin, #cboProbabilidadFin", function () {
+                const grupo = $(this).data("grupo");
+                setValores(grupo);
+            });
+
+            $(document).on("change", "#cboMes", function () {
+                var selectedValue = $(this).val();
+                if (selectedValue >= 1 && selectedValue <= 3) {
+                    $("#cboTrimestre").val(1);
+                } else if (selectedValue >= 4 && selectedValue <= 6) {
+                    $("#cboTrimestre").val(2);
+                } else if (selectedValue >= 7 && selectedValue <= 9) {
+                    $("#cboTrimestre").val(3);
+                } else if (selectedValue >= 10 && selectedValue <= 12) {
+                    $("#cboTrimestre").val(4);
+                } else {
+                    $("#cboTrimestre").val(0);
+                }
+            });
+
+            $(document).on("click", "#btnGetMatriz", function () {
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
+                    showMsg('Espere a obtener más datos...', 'alert');
+                    return;
+                } else {
+                    fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
+                        if (response) {
+                            logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
+                            if (response !== 'error') {
+                                if (response.length !== 0) {
+                                    gDma(cveOS, cveUP, eFiscal);
+                                } else {
+                                    showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
+                                    return;
+                                }
+                            } else {
+                                return;
+                            }
+                        } else {
+                            return;
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "#btnGetPtar", function () {
+                var configVal = $(this)[0].dataset.ctrlValidate;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
+                    showMsg('Espere a obtener más datos...', 'alert');
+                    return;
+                } else {
+                    fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
+                        if (response) {
+                            logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
+                            if (response !== 'error') {
+                                if (response.length !== 0) {
+                                    getPtar(cveOS, cveUP, eFiscal);
+                                } else {
+                                    showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
+                                    return;
+                                }
+                            } else {
+                                return;
+                            }
+                        } else {
+                            return;
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "#btnGetMapa", function () {
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
+                    showMsg('Espere a obtener más datos...', 'alert');
+                    return;
+                } else {
+                    fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
+                        if (response) {
+                            logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
+                            if (response !== 'error') {
+                                if (response.length !== 0) {
+                                    gDch(cveOS, cveUP, 'printPage', 'null', 0, eFiscal);
+                                } else {
+                                    showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
+                                    return;
+                                }
+                            } else {
+                                return;
+                            }
+                        } else {
+                            return;
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "#btnGetConcentrado", function () {
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
+                    showMsg('Espere a obtener más datos...', 'alert');
+                    return;
+                } else {
+                    fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
+                        if (response) {
+                            logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
+                            if (response !== 'error') {
+                                if (response.length !== 0) {
+                                    gDcon(cveOS, cveUP, eFiscal);
+                                } else {
+                                    showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
+                                    return;
+                                }
+                            } else {
+                                return;
+                            }
+                        } else {
+                            return;
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "#btnSendToValidate", function (event) {
+                event.preventDefault(); // importante mantenerlo para detener navegación u otras acciones
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
+                    showMsg('Espere a obtener más datos...', 'alert');
+                    return;
+                }
+
+                fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, async function (response) {
+                    if (response) {
+                        logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
+                        if (response !== 'error') {
+                            if (response.length !== 0) {
+                                const confirm = await alertConfirmMessage('¿Está seguro de enviar su información a validación?');
+                                if (!confirm) {
+                                    return
+                                } else {
+                                    fetchDataArr(52, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal, _idCtrlRiesgo: 0 }, 0, function (response) {
+                                        if (response) {
+                                            logger.log("RESPUESTA DE ENVIO A VALIDACION DE RIESGOS", response);
+                                            if (response !== 'error') {
+                                                const algunoFallaFactor = response.some(item => item.NUM_FACTORES === 0);
+                                                const algunoFallaControl = response.some(item => item.NUM_CONTROLES === 0);
+                                                const algunoFallaAccion = response.some(item => item.NUM_ACCIONES === 0);
+                                                const algunoFallaActividad = response.some(item => item.NUM_ACTIVIDADES === 0);
+                                                const algunaObservacion = response.some(item => item.NUM_OBSERVACIONES !== 0);
+                                                const sinMetaProgramada = response.some(item => item.META_PROGRAMA === 0);
+
+                                                const algunaNoValidada = response.some(item => item.SN_VALIDA === null && item.SN_ENVIADO === true);
+                                                const idCtrlRiesgos = response.filter(item => item.ID_CTRL_RIESGO !== 0 && (item.SN_VALIDA === false || item.SN_VALIDA === null)).map(item => item.ID_CTRL_RIESGO).join('|');
+
+                                                if (algunaNoValidada) {
+                                                    showMsg(`Antes de continuar con el envio, necesita esperar a que validen o rechazen los demas riesgos enviados.`, 'info');
+                                                    return;
+                                                }
+
+                                                if (sinMetaProgramada) {
+                                                    showMsg(`Al parecer no ha establecido sus metas, verifique de favor.`, 'info');
+                                                    return;
+                                                }
+
+                                                if (algunoFallaFactor || algunoFallaControl || algunoFallaAccion || algunoFallaActividad) {
+                                                    showMsg(`Esta intentando enviar información incompleta. Verifique de favor antes de enviar.`, 'info');
+                                                    return;
+                                                } else {
+                                                    if (algunaObservacion) {
+                                                        showMsg("No puede continuar con el envio, hasta que solvente sus observaciones.", 'error');
+                                                        return;
+                                                    } else {
+                                                        logger.log("Enviando información a validación");
+                                                        uPri3(cveOS, cveUP, idCtrlRiesgos, eFiscal);
                                                     }
                                                 }
-                                            });
-                                        }
-                                    } else {
-                                        showMsg("Ocurrió un error al mostrar resultados.", 'error');
-                                    }
-                                } else if (response === "error") {
-                                    showMsg("Error al cargar datos", 'error');
-                                }
-                            });
-                        }
-                    }
-                }
-            });
-        }
-    });
-
-    $(document).on("click", "#btnUpdateValoresRiesgoFin", function () {
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        var idReturn2 = $(this)[0].dataset.ctrlFactor;
-        if (idReturn !== 0) {
-            if (validarFormularioValoresFinal() === true) {
-                //const cboControlData = $("#cboControl").val();
-                const cboImpactoFinData = $("#cboImpactoFin").val();
-                const cboProbabilidadFinData = $("#cboProbabilidadFin").val();
-                const cboCuadranteFinData = $("#cboCuadranteFin").val();
-                //const cboEstrategiaData = $("#cboEstrategia").val();
-                const txtFolioControlFactorData = $("#txtFolioControlFactor").val().trim();
-                uPri2(cboImpactoFinData, cboProbabilidadFinData, cboCuadranteFinData, idReturn);
-                $('#modalVFinForm').modal('hide');
-                // gDfa(idReturn);
-                gDco(idReturn2, txtFolioControlFactorData.substring(0, 6));
-            }
-        } else {
-            showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
-            return;
-        }
-    });
-
-    $(document).on("click", "#btnN_Accion", function () {
-        clearForms(5);
-        var idReturn = $(this)[0].dataset.ctrlControl;
-        var idAccion = $(this)[0].dataset.ctrlAccion;
-        $("#btnS_Accion").attr("data-ctrl-control", idReturn);
-        $("#btnS_Accion").attr("data-ctrl-accion", 0);
-        gDac(idReturn);
-        if (idReturn !== undefined) {
-            $("#modalAccionForm").modal("show");
-        } else {
-            showMsg('Necesita elegir primero a que control necesita insertar su acción.', 'alert');
-            return;
-        }
-    });
-
-    $(document).on("click", "#btnS_Accion", function () {
-        $("#btnS_Accion").attr("disabled", true);
-        var idReturn = $(this)[0].dataset.ctrlControl;
-        var idCtrlAccion = $(this)[0].dataset.ctrlAccion;
-        if (idReturn === 0 || idReturn === "0" || idReturn === null) {
-            showMsg("Ocurrio un error al obtener información extra del factor", 'error');
-            return;
-        }
-        if (validarFormularioAccion() === true) {
-            const txtDescAccionData = $("#txtDescAccion").val().trim();
-            sDac(idReturn, txtDescAccionData, idCtrlAccion);
-            $("#btnS_Accion").removeAttr("disabled");
-        } else {
-            $("#btnS_Accion").removeAttr("disabled");
-        }
-    });
-
-    $(document).on("click", ".btnSeeDatosAccion", function () { // VER ACTIVIDADES
-        clearForms(6);
-        $("#containerDataActividad").html(null);
-        $("#containerDataActividad_x_Accion").html(null);
-        var idReturn = $(this)[0].dataset.ctrlAccion;
-        var numeroControlAccion = $(this)[0].dataset.ctrlNoControl;
-        gDact(idReturn, numeroControlAccion);
-        $("#btnS_Actividad").attr("data-ctrl-actividad", 0);
-        $("#btnS_Actividad").attr("data-ctrl-accion", idReturn);
-        $("#btnN_Actividad").attr("data-ctrl-accion", idReturn);
-        $("#btnN_Actividad").attr("data-ctrl-no-control", numeroControlAccion);
-        $("#check5").prop('checked', false);
-        $("#check6").prop('checked', true);
-        columnActividad.show();
-    });
-
-    $(document).on("click", ".btnEditDatosAccion", function () {
-        var idCtrlAccion = $(this)[0].dataset.ctrlAccion;
-        var idCtrlControl = $(this)[0].dataset.ctrlControl;
-        var numeroControlAccion = $(this)[0].dataset.ctrlNoControl;
-        $("#btnS_Accion").attr("data-ctrl-accion", idCtrlAccion);
-        $("#btnS_Accion").attr("data-ctrl-control", idCtrlControl);
-        //gDac(idCtrlControl);
-        gDacById(idCtrlAccion, 1);
-        $("#btnS_Accion").removeAttr("disabled");
-        $("#modalAccionForm").modal("show");
-    });
-
-    $(document).on("click", "#btnCancel_Accion", function () {
-        var idReturn = $(this)[0].dataset.ctrlControl;
-        $("#btnS_Accion").attr("data-ctrl-accion", 0);
-        $("#btnS_Accion").attr("data-ctrl-control", idReturn);
-        clearForms(5);
-        //gDac(idReturn);
-        $("#modalAccionForm").modal("hide");
-    });
-
-    $(document).on("click", "#btnN_Actividad", function () {
-        clearForms(6);
-        var idReturn = $(this)[0].dataset.ctrlAccion;
-        var numeroControlAccion = $(this)[0].dataset.ctrlNoControl;
-        gDact(idReturn, numeroControlAccion);
-        $("#btnS_Actividad").attr("data-ctrl-actividad", 0);
-        $("#btnS_Actividad").attr("data-ctrl-no-actividad", numeroControlAccion);
-        $("#btnCancel_Actividad").attr("data-ctrl-no-actividad", numeroControlAccion);
-        if (idReturn !== undefined) {
-            $("#modalActividadForm").modal("show");
-            $("#divInsertMeta").show();
-            $("#divUpdateMeta").hide();
-        } else {
-            showMsg('Necesita elegir primero a que acción necesita insertar sus actividades.', 'alert');
-            return;
-        }
-    });
-
-    $(document).on("click", "#btnS_Actividad", function () {
-        const valores = obtenerValores();
-        $("#btnS_Actividad").attr("disabled", true);
-        var idReturn = $(this)[0].dataset.ctrlAccion;
-        var idCtrlActividad = $(this)[0].dataset.ctrlActividad;
-        if (idReturn === 0 || idReturn === "0" || idReturn === null) {
-            showMsg("Ocurrio un error al obtener información extra de la acción", 'error');
-            return;
-        }
-        if (validarFormularioActividad() === true) {
-            if (idCtrlActividad === "0") {
-                if (!validarTextboxes()) {
-                    $("#btnS_Actividad").removeAttr("disabled");
-                    return;
-                }
-                //const txtResponsableActividadData = $("#txtResponsableActividad").val().trim();
-                const cboResponsableData = $("#cboResponsable").val();
-                const listMesData = $("#cboMes2").val();
-                //const cboMesData = $("#cboMes").val();
-                const txtDescActividadData = $("#txtDescActividad").val().trim();
-                //const cboTrimestreData = $("#cboTrimestre").val();
-                const txtNoActividadData = $("#txtNoActividad").val().trim();
-                const txtNoMetaData = $("#txtNoMeta").val().trim();
-                const txtEvidenciaData = $("#txtEvidencia").val().trim();
-                const valoresMeses = JSON.stringify(valores);
-                //const cboTipoReporteData = $("#cboTipoReporte").val();
-                //sDact(idReturn, cboResponsableData, txtDescActividadData, cboTrimestreData, cboMesData, idCtrlActividad, txtNoActividadData);
-                //sDact(idReturn, cboResponsableData, txtDescActividadData, listMesData, idCtrlActividad, txtNoActividadData, 0, txtNoMetaData, txtEvidenciaData);
-                sDact(idReturn, cboResponsableData, txtDescActividadData, valoresMeses, idCtrlActividad, txtNoActividadData, 0, txtNoMetaData, txtEvidenciaData);
-                $("#btnS_Actividad").removeAttr("disabled");
-                gDact(idReturn, txtNoActividadData.substring(0, 8));
-            } else if (idCtrlActividad !== "0") {
-                //const txtResponsableActividadData = $("#txtResponsableActividad").val().trim();
-                const cboResponsableData = $("#cboResponsable").val();
-                const listMesData = $("#cboMes2").val();
-                //const cboMesData = $("#cboMes").val();
-                const txtDescActividadData = $("#txtDescActividad").val().trim();
-                //const cboTrimestreData = $("#cboTrimestre").val();
-                const txtNoActividadData = $("#txtNoActividad").val().trim();
-                const txtNoMetaData = $("#txtNoMeta").val().trim();
-                const txtEvidenciaData = $("#txtEvidencia").val().trim();
-                //const cboTipoReporteData = $("#cboTipoReporte").val();
-                sDact(idReturn, cboResponsableData, txtDescActividadData, listMesData, idCtrlActividad, txtNoActividadData, 1, txtNoMetaData, txtEvidenciaData);
-                $("#btnS_Actividad").removeAttr("disabled");
-                gDact(idReturn, txtNoActividadData.substring(0, 8));
-            }
-        } else {
-            $("#btnS_Actividad").removeAttr("disabled");
-        }
-    });
-
-    $(document).on("click", ".btnEditDatosActividad", function () {
-        var idCtrlActividad = $(this)[0].dataset.ctrlActividad;
-        var idCtrlAccion = $(this)[0].dataset.ctrlAccion;
-        var ctrlNoActividad = $(this)[0].dataset.ctrlNoActividad;
-        $("#btnS_Actividad").attr("data-ctrl-actividad", idCtrlActividad);
-        $("#btnCancel_Actividad").attr("data-ctrl-no-actividad", ctrlNoActividad);
-        //gDact(idCtrlAccion, ctrlNoActividad.substring(8));
-        gDactById(idCtrlActividad, 1);
-        $("#modalActividadForm").modal("show");
-        $("#divInsertMeta").hide();
-        $("#divUpdateMeta").show();
-    });
-
-    $(document).on("click", "#btnCancel_Actividad", function () {
-        var idReturn = $(this)[0].dataset.ctrlAccion;
-        var ctrlNoActividad = $(this)[0].dataset.ctrlNoActividad;
-        $("#btnS_Actividad").attr("data-ctrl-actividad", 0);
-        clearForms(6);
-        //gDact(idReturn, ctrlNoActividad.substring(0, 8));
-        $("#modalActividadForm").modal("hide");
-    });
-
-    $(document).on("change", "#cboImpactoFin", function () {
-        var selectedValue = $(this).val();
-        logger.info(parseInt($("#impactoLocal").text()));
-        if (parseInt($("#impactoLocal").text()) > selectedValue) {
-            showMsg("No puede ingresar un valor de impacto menor al inicial", 'error');
-            $(this).val(0);
-        }
-    });
-
-    $(document).on("change", "#cboProbabilidadFin", function () {
-        var selectedValue = $(this).val();
-        logger.info(parseInt($("#probabilidadLocal").text()));
-        if (parseInt($("#probabilidadLocal").text()) > selectedValue) {
-            showMsg("No puede ingresar un valor de probabilidad menor al inicial", 'error');
-            $(this).val(0);
-        }
-    });
-
-    $(document).on("change", "#cboEfiscal", function () {
-        var selectedValue = $(this).val();
-        gDfCos(selectedValue)
-    });
-
-    $(document).on("change", "#cboOs", function () {
-        var selectedValue = $(this).val();
-        gDfCup(cveEfiscald, selectedValue, 'cambio')
-    });
-
-    $(document).on("change", "#cboProceso", function () {
-        var selectedValue = $(this).val();
-        if (selectedValue === undefined || selectedValue === "") {
-            $("#txtOSProceso").val("");
-            $("#txtUPProceso").val("");
-        } else if (selectedValue === 0 || selectedValue === "0") {
-            var cveOS = $("#cboOs").val();
-            var cveUP = $("#cboUp").val();
-            var eFiscal = $("#cboEfiscal").val();
-            const initialOk = verifyInitialDataOUE(cveOS, cveUP, eFiscal);
-            if (!initialOk) return;
-            $("#txtOSProceso").val(cveOS);
-            $("#txtUPProceso").val(cveUP);
-        } else {
-            gDpr(selectedValue, $("#cboOs").val(), $("#cboUp").val());
-        }
-    });
-
-    $(document).on("change", "#cboImpactoInicio, #cboProbabilidadInicio, #cboImpactoFin, #cboProbabilidadFin", function () {
-        const grupo = $(this).data("grupo");
-        setValores(grupo);
-    });
-
-    $(document).on("change", "#cboMes", function () {
-        var selectedValue = $(this).val();
-        if (selectedValue >= 1 && selectedValue <= 3) {
-            $("#cboTrimestre").val(1);
-        } else if (selectedValue >= 4 && selectedValue <= 6) {
-            $("#cboTrimestre").val(2);
-        } else if (selectedValue >= 7 && selectedValue <= 9) {
-            $("#cboTrimestre").val(3);
-        } else if (selectedValue >= 10 && selectedValue <= 12) {
-            $("#cboTrimestre").val(4);
-        } else {
-            $("#cboTrimestre").val(0);
-        }
-    });
-
-    $(document).on("click", "#btnGetMatriz", function () {
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
-            showMsg('Espere a obtener más datos...', 'alert');
-            return;
-        } else {
-            fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
-                if (response) {
-                    logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
-                    if (response !== 'error') {
-                        if (response.length !== 0) {
-                            gDma(cveOS, cveUP, eFiscal);
-                        } else {
-                            showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            });
-        }
-    });
-
-    $(document).on("click", "#btnGetPtar", function () {
-        var configVal = $(this)[0].dataset.ctrlValidate;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
-            showMsg('Espere a obtener más datos...', 'alert');
-            return;
-        } else {
-            fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
-                if (response) {
-                    logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
-                    if (response !== 'error') {
-                        if (response.length !== 0) {
-                            getPtar(cveOS, cveUP, eFiscal);
-                        } else {
-                            showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            });
-        }
-    });
-
-    $(document).on("click", "#btnGetMapa", function () {
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
-            showMsg('Espere a obtener más datos...', 'alert');
-            return;
-        } else {
-            fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
-                if (response) {
-                    logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
-                    if (response !== 'error') {
-                        if (response.length !== 0) {
-                            gDch(cveOS, cveUP, 'printPage', 'null', 0, eFiscal);
-                        } else {
-                            showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            });
-        }
-    });
-
-    $(document).on("click", "#btnGetConcentrado", function () {
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
-            showMsg('Espere a obtener más datos...', 'alert');
-            return;
-        } else {
-            fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, function (response) {
-                if (response) {
-                    logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
-                    if (response !== 'error') {
-                        if (response.length !== 0) {
-                            gDcon(cveOS, cveUP, eFiscal);
-                        } else {
-                            showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            });
-        }
-    });
-
-    $(document).on("click", "#btnSendToValidate", function (event) {
-        event.preventDefault(); // importante mantenerlo para detener navegación u otras acciones
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
-            showMsg('Espere a obtener más datos...', 'alert');
-            return;
-        }
-
-        fetchDataArr(72, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 0, async function (response) {
-            if (response) {
-                logger.error("RESPUESTA DATOS PERSONAS REPORTE: ", response);
-                if (response !== 'error') {
-                    if (response.length !== 0) {
-                        const confirm = await alertConfirmMessage('¿Está seguro de enviar su información a validación?');
-                        if (!confirm) {
-                            return
-                        } else {
-                            fetchDataArr(52, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal, _idCtrlRiesgo: 0 }, 0, function (response) {
-                                if (response) {
-                                    logger.log("RESPUESTA DE ENVIO A VALIDACION DE RIESGOS", response);
-                                    if (response !== 'error') {
-                                        const algunoFallaFactor = response.some(item => item.NUM_FACTORES === 0);
-                                        const algunoFallaControl = response.some(item => item.NUM_CONTROLES === 0);
-                                        const algunoFallaAccion = response.some(item => item.NUM_ACCIONES === 0);
-                                        const algunoFallaActividad = response.some(item => item.NUM_ACTIVIDADES === 0);
-                                        const algunaObservacion = response.some(item => item.NUM_OBSERVACIONES !== 0);
-                                        const sinMetaProgramada = response.some(item => item.META_PROGRAMA === 0);
-
-                                        const algunaNoValidada = response.some(item => item.SN_VALIDA === null && item.SN_ENVIADO === true);
-                                        const idCtrlRiesgos = response.filter(item => item.ID_CTRL_RIESGO !== 0 && (item.SN_VALIDA === false || item.SN_VALIDA === null)).map(item => item.ID_CTRL_RIESGO).join('|');
-
-                                        if (algunaNoValidada) {
-                                            showMsg(`Antes de continuar con el envio, necesita esperar a que validen o rechazen los demas riesgos enviados.`, 'info');
-                                            return;
-                                        }
-
-                                        if (sinMetaProgramada) {
-                                            showMsg(`Al parecer no ha establecido sus metas, verifique de favor.`, 'info');
-                                            return;
-                                        }
-
-                                        if (algunoFallaFactor || algunoFallaControl || algunoFallaAccion || algunoFallaActividad) {
-                                            showMsg(`Esta intentando enviar información incompleta. Verifique de favor antes de enviar.`, 'info');
-                                            return;
-                                        } else {
-                                            if (algunaObservacion) {
-                                                showMsg("No puede continuar con el envio, hasta que solvente sus observaciones.", 'error');
-                                                return;
                                             } else {
-                                                logger.log("Enviando información a validación");
-                                                uPri3(cveOS, cveUP, idCtrlRiesgos);
+                                                showMsg("Ocurrió un error al obtener los datos.", 'error');
+                                                return;
                                             }
+                                        } else if (response === "error") {
+                                            showMsg("Error al cargar datos", 'error');
                                         }
-                                    } else {
-                                        showMsg("Ocurrió un error al obtener los datos.", 'error');
-                                        return;
-                                    }
-                                } else if (response === "error") {
-                                    showMsg("Error al cargar datos", 'error');
+                                    });
                                 }
-                            });
-                        }
-                    } else {
-                        showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        });
-    });
-
-    $(document).on("click", ".btnSolventarObser", async function (event) {
-        var idReturn1 = $(this)[0].dataset.ctrlObservacion;
-        var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
-        const confirm = await alertConfirmMessage('¿Está seguro de solventar su observación?');
-        if (!confirm) {
-            return
-        } else {
-            if (idReturn1 !== 0) {
-                fetchDataArr(55, { _idCtrlObservacion: idReturn1, _idCtrlRiesgo: idReturn2 }, 0, function (response) {
-                    if (response) {
-                        logger.log("Respuesta a UPDATE OBSERVACION:", response);
-                        if (response === 'ok') {
-                            gDob(idReturn2);
-                            //gDno();
-                            //$("#modalObservacionesReporte").modal("hide");
+                            } else {
+                                showMsg('Favor de ir a la pantalla de Control de Datos Reporte, y registre los encabezados. De lo contrario, no podrá continuar.', 'alert');
+                                return;
+                            }
                         } else {
-                            showMsg("Ocurrió un error al obtener los datos.", 'error');
                             return;
                         }
                     } else {
-                        showMsg("Error al obtener información...", 'error');
-                    }
-                });
-            } else {
-                showMsg("Ocurrió un error al obtener los datos de la observación.", 'error');
-                return;
-            }
-        }
-    });
-
-    $(document).on("change", "#cboMes2", function () {
-        crearTextboxes();
-    });
-
-    $(document).on("click", ".btnSeeResumen", function () {
-        var idReturn1 = $(this)[0].dataset.ctrlAlineacion;
-        var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
-        gRes(idReturn1);
-    });
-
-    $(document).on("click", "#btnS_FactorXControl", function () {
-        var idReturn = $(this)[0].dataset.ctrlFactor;
-        var numFolio = $(this)[0].dataset.ctrlFolio;
-        var cboImpacto = $("#cboControlFactor").val();
-        if (idReturn !== 0) {
-            if (cboImpacto !== "" || cboImpacto !== "0" || cboImpacto !== 0) {
-                fetchDataArr(60, { _idCtrlFactor: idReturn, _idControlFactor: cboImpacto }, 0, function (response) {
-                    if (response) {
-                        logger.warn("Datos recibidos a UPDATE FACTOR:", response);
-                        if (response !== 'error') {
-                            $('#modalFactorXControl').modal('hide');
-                            //gDfa(idReturn);
-                            gDco(idReturn, numFolio);
-                        }
-                    }
-                });
-
-            } else {
-                showMsg("Elija si se controla el factor, antes de continuar con la inserción de controles.", 'error');
-                return;
-            }
-        } else {
-            showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
-            return;
-        }
-    });
-
-    $(document).on("change", "#cboControlDocumentado, #cboControlFormalizado, #cboControlAplica, #cboControlEfectivo", function () {
-        const id01 = $("#cboControlDocumentado").val();
-        const id02 = $("#cboControlFormalizado").val();
-        const id03 = $("#cboControlAplica").val();
-        const id04 = $("#cboControlEfectivo").val();
-        const arrSelects = [{ SELECT: id01 }, { SELECT: id02 }, { SELECT: id03 }, { SELECT: id04 }]
-        //const algunoFalla = arrSelects.some(item => item.SELECT === '1');
-        const algunoFalla = arrSelects.filter(item => item.SELECT === '1');
-        logger.info(arrSelects);
-        logger.error(algunoFalla);
-        if (algunoFalla.length === 4) {
-            $("#cboDeterminacion").val(1);
-        } else {
-            $("#cboDeterminacion").val(2);
-        }
-    });
-
-    $(document).on("click", "#btnU_Control", function () {
-        var idReturn = $(this)[0].dataset.ctrlFactor;
-        var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
-        var idReturn3 = $(this)[0].dataset.ctrlFolio;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
-            showMsg('Espere a obtener más datos...', 'alert');
-            return;
-        }
-
-        fetchDataArr(61, { _cveOS: cveOS, _cveUP: cveUP, _eFiscal: eFiscal, _idCtrlRiesgo: idReturn2 }, 0, function (response) {
-            if (response) {
-                logger.warn("Datos devueltos sobre VALOR INICIAL", response)
-                if (response !== 'error') {
-                    if (response.length === 0) {
-                        showMsg("No existen controles.", 'info');
                         return;
                     }
-                    const algunoFalla = response.some(item => item.NUMofCONTROLS === 0);
-                    if (algunoFalla) {
-                        $('#modalControlXRiesgo').modal('hide');
-                        const foliosFallidos = response.filter(item => item.NUMofCONTROLS === 0).map(item => item.FOLIO).join(', ');
-                        showMsg("No puede evaluar el riesgo, porque los factores [" + foliosFallidos + "] no contienen sus respectivos controles, favor de revisar.", 'info');
+                });
+            });
+
+            $(document).on("click", ".btnSolventarObser", async function (event) {
+                var idReturn1 = $(this)[0].dataset.ctrlObservacion;
+                var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
+                const confirm = await alertConfirmMessage('¿Está seguro de solventar su observación?');
+                if (!confirm) {
+                    return
+                } else {
+                    if (idReturn1 !== 0) {
+                        fetchDataArr(55, { _idCtrlObservacion: idReturn1, _idCtrlRiesgo: idReturn2 }, 0, function (response) {
+                            if (response) {
+                                logger.log("Respuesta a UPDATE OBSERVACION:", response);
+                                if (response === 'ok') {
+                                    gDob(idReturn2);
+                                    //gDno();
+                                    //$("#modalObservacionesReporte").modal("hide");
+                                } else {
+                                    showMsg("Ocurrió un error al obtener los datos.", 'error');
+                                    return;
+                                }
+                            } else {
+                                showMsg("Error al obtener información...", 'error');
+                            }
+                        });
                     } else {
-                        showMsg("Continuando evaluacion riesgo.", 'info');
-                        $("#btnS_ControlXRiesgo").attr("data-ctrl-riesgo", idReturn2);
-                        $("#btnS_ControlXRiesgo").attr("data-ctrl-factor", idReturn);
-                        $("#btnS_ControlXRiesgo").attr("data-ctrl-folio", idReturn3);
-                        $('#modalControlXRiesgo').modal('show');
+                        showMsg("Ocurrió un error al obtener los datos de la observación.", 'error');
+                        return;
+                    }
+                }
+            });
+
+            $(document).on("change", "#cboMes2", function () {
+                crearTextboxes();
+            });
+
+            $(document).on("click", ".btnSeeResumen", function () {
+                var idReturn1 = $(this)[0].dataset.ctrlAlineacion;
+                var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
+                gRes(idReturn1);
+            });
+
+            $(document).on("click", "#btnS_FactorXControl", function () {
+                var idReturn = $(this)[0].dataset.ctrlFactor;
+                var numFolio = $(this)[0].dataset.ctrlFolio;
+                var cboImpacto = $("#cboControlFactor").val();
+                if (idReturn !== 0) {
+                    if (cboImpacto !== "" || cboImpacto !== "0" || cboImpacto !== 0) {
+                        fetchDataArr(60, { _idCtrlFactor: idReturn, _idControlFactor: cboImpacto }, 0, function (response) {
+                            if (response) {
+                                logger.warn("Datos recibidos a UPDATE FACTOR:", response);
+                                if (response !== 'error') {
+                                    $('#modalFactorXControl').modal('hide');
+                                    //gDfa(idReturn);
+                                    gDco(idReturn, numFolio);
+                                }
+                            }
+                        });
+
+                    } else {
+                        showMsg("Elija si se controla el factor, antes de continuar con la inserción de controles.", 'error');
+                        return;
                     }
                 } else {
-                    showMsg("Ocurrió un error al mostrar resultados.", 'error');
+                    showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
+                    return;
                 }
-            } else if (response === "error") {
-                showMsg("Error al cargar datos", 'error');
-            }
-        });
-    });
+            });
 
-    $(document).on("click", "#btnS_ControlXRiesgo", function () {
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        var idReturn2 = $(this)[0].dataset.ctrlFactor;
-        var idReturn3 = $(this)[0].dataset.ctrlFolio;
-        var cboControl = $("#cboControl").val();
-        if (idReturn !== 0) {
-            if (cboControl !== "" || cboControl !== "0") {
-                fetchDataArr(62, { _idCtrlRiesgo: idReturn, _idControlRiesgo: cboControl }, 0, function (response) {
+            $(document).on("change", "#cboControlDocumentado, #cboControlFormalizado, #cboControlAplica, #cboControlEfectivo", function () {
+                const id01 = $("#cboControlDocumentado").val();
+                const id02 = $("#cboControlFormalizado").val();
+                const id03 = $("#cboControlAplica").val();
+                const id04 = $("#cboControlEfectivo").val();
+                const arrSelects = [{ SELECT: id01 }, { SELECT: id02 }, { SELECT: id03 }, { SELECT: id04 }]
+                //const algunoFalla = arrSelects.some(item => item.SELECT === '1');
+                const algunoFalla = arrSelects.filter(item => item.SELECT === '1');
+                logger.info(arrSelects);
+                logger.error(algunoFalla);
+                if (algunoFalla.length === 4) {
+                    $("#cboDeterminacion").val(1);
+                } else {
+                    $("#cboDeterminacion").val(2);
+                }
+            });
+
+            $(document).on("click", "#btnU_Control", function () {
+                var idReturn = $(this)[0].dataset.ctrlFactor;
+                var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
+                var idReturn3 = $(this)[0].dataset.ctrlFolio;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
+                    showMsg('Espere a obtener más datos...', 'alert');
+                    return;
+                }
+
+                fetchDataArr(61, { _cveOS: cveOS, _cveUP: cveUP, _eFiscal: eFiscal, _idCtrlRiesgo: idReturn2 }, 0, function (response) {
                     if (response) {
-                        logger.warn("Datos recibidos a UPDATE RIESGO:", response);
+                        logger.warn("Datos devueltos sobre VALOR INICIAL", response)
                         if (response !== 'error') {
-                            $('#modalControlXRiesgo').modal('hide');
-                            gDfa(idReturn);
-                            gDco(idReturn2, idReturn3);
+                            if (response.length === 0) {
+                                showMsg("No existen controles.", 'info');
+                                return;
+                            }
+                            const algunoFalla = response.some(item => item.NUMofCONTROLS === 0);
+                            if (algunoFalla) {
+                                $('#modalControlXRiesgo').modal('hide');
+                                const foliosFallidos = response.filter(item => item.NUMofCONTROLS === 0).map(item => item.FOLIO).join(', ');
+                                showMsg("No puede evaluar el riesgo, porque los factores [" + foliosFallidos + "] no contienen sus respectivos controles, favor de revisar.", 'info');
+                            } else {
+                                showMsg("Continuando evaluacion riesgo.", 'info');
+                                $("#btnS_ControlXRiesgo").attr("data-ctrl-riesgo", idReturn2);
+                                $("#btnS_ControlXRiesgo").attr("data-ctrl-factor", idReturn);
+                                $("#btnS_ControlXRiesgo").attr("data-ctrl-folio", idReturn3);
+                                $('#modalControlXRiesgo').modal('show');
+                            }
+                        } else {
+                            showMsg("Ocurrió un error al mostrar resultados.", 'error');
                         }
+                    } else if (response === "error") {
+                        showMsg("Error al cargar datos", 'error');
                     }
                 });
+            });
 
-            } else {
-                showMsg("Elija si se controla del reisgo, antes de continuar con la inserción de acciones.", 'error');
-            }
-        } else {
-            showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
-            return;
-        }
-    });
+            $(document).on("click", "#btnS_ControlXRiesgo", function () {
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                var idReturn2 = $(this)[0].dataset.ctrlFactor;
+                var idReturn3 = $(this)[0].dataset.ctrlFolio;
+                var cboControl = $("#cboControl").val();
+                if (idReturn !== 0) {
+                    if (cboControl !== "" || cboControl !== "0") {
+                        fetchDataArr(62, { _idCtrlRiesgo: idReturn, _idControlRiesgo: cboControl }, 0, function (response) {
+                            if (response) {
+                                logger.warn("Datos recibidos a UPDATE RIESGO:", response);
+                                if (response !== 'error') {
+                                    $('#modalControlXRiesgo').modal('hide');
+                                    gDfa(idReturn);
+                                    gDco(idReturn2, idReturn3);
+                                }
+                            }
+                        });
 
-    $(document).on("click", "#btnS_AccionXRiesgo", function () {
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        var idReturn2 = $(this)[0].dataset.ctrlControl;
-        var idReturn3 = $(this)[0].dataset.ctrlAccion;
-        var cboEstrategia = $("#cboEstrategia").val();
-        if (idReturn !== 0) {
-            if (cboEstrategia !== "" || cboEstrategia !== "0") {
-                fetchDataArr(63, { _idCtrlRiesgo: idReturn, _idEstrategia: cboEstrategia }, 0, function (response) {
+                    } else {
+                        showMsg("Elija si se controla del reisgo, antes de continuar con la inserción de acciones.", 'error');
+                    }
+                } else {
+                    showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
+                    return;
+                }
+            });
+
+            $(document).on("click", "#btnS_AccionXRiesgo", function () {
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                var idReturn2 = $(this)[0].dataset.ctrlControl;
+                var idReturn3 = $(this)[0].dataset.ctrlAccion;
+                var cboEstrategia = $("#cboEstrategia").val();
+                if (idReturn !== 0) {
+                    if (cboEstrategia !== "" || cboEstrategia !== "0") {
+                        fetchDataArr(63, { _idCtrlRiesgo: idReturn, _idEstrategia: cboEstrategia }, 0, function (response) {
+                            if (response) {
+                                logger.warn("Datos recibidos a UPDATE RIESGO:", response);
+                                if (response !== 'error') {
+                                    $('#modalAccionXRiesgo').modal('hide');
+                                    gDac(idReturn2);
+                                }
+                            }
+                        });
+
+                    } else {
+                        showMsg("Elija la estrategia.", 'error');
+                    }
+                } else {
+                    showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
+                    return;
+                }
+            });
+
+            $(document).on("click", ".btnDeleteAlineacion", async function () {
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
+                if (!await alertConfirmMessage('¿Confirma la eliminación de la alineación?')) return;
+                checkDelete(cveOS, cveUP, eFiscal, 'ALINEACION', idReturn, 0, '')
+            });
+
+            $(document).on("click", ".btnDeleteRiesgo", async function () {
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                var idReturn2 = $(this)[0].dataset.ctrlAlineacion;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
+                if (!await alertConfirmMessage('¿Confirma la eliminación del riesgo?')) return;
+                checkDelete(cveOS, cveUP, eFiscal, 'RIESGO', idReturn, idReturn2, '');
+            });
+
+            $(document).on("click", ".btnDeleteFactor", async function () {
+                var idReturn = $(this)[0].dataset.ctrlFactor;
+                var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
+                if (!await alertConfirmMessage('¿Confirma la eliminación del factor?')) return;
+                checkDelete(cveOS, cveUP, eFiscal, 'FACTOR', idReturn, idReturn2, '');
+            });
+
+
+            $(document).on("click", ".btnDeleteControl", async function () {
+                var idReturn = $(this)[0].dataset.ctrlControl;
+                var idReturn2 = $(this)[0].dataset.ctrlFactor;
+                var numControl = $(this)[0].dataset.ctrl1;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
+                if (!await alertConfirmMessage('¿Confirma la eliminación del control?')) return;
+                checkDelete(cveOS, cveUP, eFiscal, 'CONTROL', idReturn, idReturn2, numControl);
+            });
+
+            $(document).on("click", ".btnDeleteAccion", async function () {
+                var idReturn = $(this)[0].dataset.ctrlAccion;
+                var idReturn2 = $(this)[0].dataset.ctrlControl;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
+                if (!await alertConfirmMessage('¿Confirma la eliminación de la acción?')) return;
+                checkDelete(cveOS, cveUP, eFiscal, 'ACCION', idReturn, idReturn2, '');
+            });
+
+            $(document).on("click", ".btnDeleteActividad", async function () {
+                var idReturn = $(this)[0].dataset.ctrlActividad;
+                var idReturn2 = $(this)[0].dataset.ctrlAccion;
+                var noActividad = $(this)[0].dataset.ctrlNoActividad;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
+                if (!await alertConfirmMessage('¿Confirma la eliminación de la actividad?')) return;
+                checkDelete(cveOS, cveUP, eFiscal, 'ACTIVIDAD', idReturn, idReturn2, noActividad);
+            });
+
+            $(document).on("click", ".btnSetObjetivosModal", function () {
+                var idReturn = $(this)[0].dataset.ctrlAlineacion;
+                var toEdit = $(this)[0].dataset.ctrlDe;
+                var cveOS = $("#cboOs").val();
+                var cveUP = $("#cboUp").val();
+                var eFiscal = $("#cboEfiscal").val();
+                if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
+                fetchDataArr(73, {}, 0, function (response) {
                     if (response) {
-                        logger.warn("Datos recibidos a UPDATE RIESGO:", response);
-                        if (response !== 'error') {
-                            $('#modalAccionXRiesgo').modal('hide');
-                            gDac(idReturn2);
-                        }
+                        logger.log("LLAMADA A CATALOGO SECTORIAL", response);
+                        $("#btnS_AlineacionObjetivo").attr("data-ctrl-alineacion", idReturn);
+                        $("#modalAlineacionObjetivo").modal("show");
+                        inicializarSistemaAlineacion(response, parseInt(toEdit));
+                    } else {
+                        showMsg("Ocurrio un error.", 'error');
                     }
                 });
+            });
 
-            } else {
-                showMsg("Elija la estrategia.", 'error');
-            }
-        } else {
-            showMsg("Ocurrio un error al obtener información extra del riesgo", 'error');
-            return;
-        }
-    });
+            $(document).on("click", ".btnDeleteObjetivoAccion", function () {
+                var idReturn = $(this)[0].dataset.ctrlIdAl;
+                var idReturn2 = $(this)[0].dataset.ctrlIdOb;
+                var idReturn3 = $(this)[0].dataset.ctrlIdAc;
+                logger.error(idReturn, idReturn2, idReturn3)
+                fetchDataArr(77, { _idCtrlAlineacion: idReturn, _idCtrlData1: idReturn2, _idCtrlData2: idReturn3 }, 0, function (response) {
+                    if (response) {
+                        logger.log("RESPUESTA DELETE OBJETIVO POR ALINEACION: ", response);
+                        showMsg(response, 'info');
+                        gDoaaById(idReturn);
+                    } else {
+                        showMsg("Ocurrio un error.", 'error');
+                    }
+                });
+            });
 
-    $(document).on("click", ".btnDeleteAlineacion", async function () {
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
-        if (!await alertConfirmMessage('¿Confirma la eliminación de la alineación?')) return;
-        checkDelete(cveOS, cveUP, eFiscal, 'ALINEACION', idReturn, 0, '')
-    });
+            $(document).on("click", ".btnSeeObservaciones", function () {
+                var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                gDob(idReturn);
+                $("#modalObservacionesReporte").modal("show");
+                // fetchDataArr(77, { _idCtrlAlineacion: idReturn, _idCtrlData1: idReturn2, _idCtrlData2: idReturn3 }, 0, function (response) {
+                //     if (response) {
+                //         logger.log("RESPUESTA DELETE OBJETIVO POR ALINEACION: ", response);
+                //         showMsg(response, 'info');
+                //         gDoaaById(idReturn);
+                //     } else {
+                //         showMsg("Ocurrio un error.", 'error');
+                //     }
+                // });
+            });
 
-    $(document).on("click", ".btnDeleteRiesgo", async function () {
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        var idReturn2 = $(this)[0].dataset.ctrlAlineacion;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
-        if (!await alertConfirmMessage('¿Confirma la eliminación del riesgo?')) return;
-        checkDelete(cveOS, cveUP, eFiscal, 'RIESGO', idReturn, idReturn2, '');
-    });
-
-    $(document).on("click", ".btnDeleteFactor", async function () {
-        var idReturn = $(this)[0].dataset.ctrlFactor;
-        var idReturn2 = $(this)[0].dataset.ctrlRiesgo;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
-        if (!await alertConfirmMessage('¿Confirma la eliminación del factor?')) return;
-        checkDelete(cveOS, cveUP, eFiscal, 'FACTOR', idReturn, idReturn2, '');
-    });
-
-
-    $(document).on("click", ".btnDeleteControl", async function () {
-        var idReturn = $(this)[0].dataset.ctrlControl;
-        var idReturn2 = $(this)[0].dataset.ctrlFactor;
-        var numControl = $(this)[0].dataset.ctrl1;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
-        if (!await alertConfirmMessage('¿Confirma la eliminación del control?')) return;
-        checkDelete(cveOS, cveUP, eFiscal, 'CONTROL', idReturn, idReturn2, numControl);
-    });
-
-    $(document).on("click", ".btnDeleteAccion", async function () {
-        var idReturn = $(this)[0].dataset.ctrlAccion;
-        var idReturn2 = $(this)[0].dataset.ctrlControl;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
-        if (!await alertConfirmMessage('¿Confirma la eliminación de la acción?')) return;
-        checkDelete(cveOS, cveUP, eFiscal, 'ACCION', idReturn, idReturn2, '');
-    });
-
-    $(document).on("click", ".btnDeleteActividad", async function () {
-        var idReturn = $(this)[0].dataset.ctrlActividad;
-        var idReturn2 = $(this)[0].dataset.ctrlAccion;
-        var noActividad = $(this)[0].dataset.ctrlNoActividad;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
-        if (!await alertConfirmMessage('¿Confirma la eliminación de la actividad?')) return;
-        checkDelete(cveOS, cveUP, eFiscal, 'ACTIVIDAD', idReturn, idReturn2, noActividad);
-    });
-
-    $(document).on("click", ".btnSetObjetivosModal", function () {
-        var idReturn = $(this)[0].dataset.ctrlAlineacion;
-        var toEdit = $(this)[0].dataset.ctrlDe;
-        var cveOS = $("#cboOs").val();
-        var cveUP = $("#cboUp").val();
-        var eFiscal = $("#cboEfiscal").val();
-        if (!verifyInitialDataOUE(cveOS, cveUP, eFiscal)) return;
-        fetchDataArr(73, {}, 0, function (response) {
-            if (response) {
-                logger.log("LLAMADA A CATALOGO SECTORIAL", response);
-                $("#btnS_AlineacionObjetivo").attr("data-ctrl-alineacion", idReturn);
-                $("#modalAlineacionObjetivo").modal("show");
-                inicializarSistemaAlineacion(response, parseInt(toEdit));
-            } else {
-                showMsg("Ocurrio un error.", 'error');
-            }
+            $(document).on("click", "#btnDeleteValorInicial", async function () {
+                try {
+                    var idReturn = $(this)[0].dataset.ctrlRiesgo;
+                    if (!await alertConfirmMessage('¿Confirma la eliminación de los valores iniciales para el riesgo?')) return;
+                    uPri4(idReturn);
+                } catch (error) {
+                    showMsg(error, 'error');
+                }
+            });
         });
-    });
-
-    $(document).on("click", ".btnDeleteObjetivoAccion", function () {
-        var idReturn = $(this)[0].dataset.ctrlIdAl;
-        var idReturn2 = $(this)[0].dataset.ctrlIdOb;
-        var idReturn3 = $(this)[0].dataset.ctrlIdAc;
-        logger.error(idReturn, idReturn2, idReturn3)
-        fetchDataArr(77, { _idCtrlAlineacion: idReturn, _idCtrlData1: idReturn2, _idCtrlData2: idReturn3 }, 0, function (response) {
-            if (response) {
-                logger.log("RESPUESTA DELETE OBJETIVO POR ALINEACION: ", response);
-                showMsg(response, 'info');
-                gDoaaById(idReturn);
-            } else {
-                showMsg("Ocurrio un error.", 'error');
-            }
-        });
-    });
-
-    $(document).on("click", ".btnSeeObservaciones", function () {
-        var idReturn = $(this)[0].dataset.ctrlRiesgo;
-        gDob(idReturn);
-        $("#modalObservacionesReporte").modal("show");
-        // fetchDataArr(77, { _idCtrlAlineacion: idReturn, _idCtrlData1: idReturn2, _idCtrlData2: idReturn3 }, 0, function (response) {
-        //     if (response) {
-        //         logger.log("RESPUESTA DELETE OBJETIVO POR ALINEACION: ", response);
-        //         showMsg(response, 'info');
-        //         gDoaaById(idReturn);
-        //     } else {
-        //         showMsg("Ocurrio un error.", 'error');
-        //     }
-        // });
-    });
-
-    $(document).on("click", "#btnDeleteValorInicial", async function () {
-        try {
-            var idReturn = $(this)[0].dataset.ctrlRiesgo;
-            if (!await alertConfirmMessage('¿Confirma la eliminación de los valores iniciales para el riesgo?')) return;
-            uPri4(idReturn);
-        } catch (error) {
-            showMsg(error, 'error');
-        }
-    });
+    }
 });
 
 function clearForms(type) {
@@ -5220,7 +5221,7 @@ var gDfCtrimestre = function (id) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", {
                     value: item.ID_TRIMESTRE,
                     text: item.DESC_TRIMESTRE
@@ -5658,35 +5659,37 @@ function limpiarSelecciones(selecciones) {
 function inicializarSistemaAlineacion(datosConsulta, ___toEdit) {
     const selecciones = renderizarCheckboxesAlineacion(datosConsulta);
     const btn = $("#btnS_AlineacionObjetivo")[0];
-    const idCtrlAlineacion = btn.dataset.ctrlAlineacion
-    btn.onclick = function () {
+    const idCtrlAlineacion = btn.dataset.ctrlAlineacion;
+
+    function enviarDatosAlineacion() {
         $("#btnS_AlineacionObjetivo").attr("disabled", true);
         const datosBD = obtenerArraysParaBD(selecciones, parseInt(idCtrlAlineacion));
-        logger.log("OBTENIENDO ARR DE DATOS  ACCIONES: ", datosBD.arrayAcciones)
-        if (datosBD.arrayAcciones.length !== 0) {
-            showMsg("Enviando datos a base de datos.", 'info');
-            //guardarEnBaseDeDatos(datosBD);
-            const valoresObjetivos = JSON.stringify(datosBD.arrayAcciones);
-            logger.log("VALORES PROCESADOS OBJETIVOS: ", valoresObjetivos)
-            fetchDataArr(75, { __listObjetivos: valoresObjetivos }, 0, function (response) {
-                if (response.flag) {
-                    showMsg(response.msg, 'success');
-                    loadInit($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
-                    $("#modalAlineacionObjetivo").modal("hide");
-                } else {
-                    showMsg(response.msg, 'error');
-                }
-            });
-            $("#btnS_AlineacionObjetivo").removeAttr("disabled");
-            gDoaaById(idCtrlAlineacion);
-        } else if (datosBD.arrayAcciones.length === 0) {
+        logger.log("OBTENIENDO ARR DE DATOS  ACCIONES: ", datosBD.arrayAcciones);
+        if (datosBD.arrayAcciones.length === 0) {
             showMsg("Favor de elegir sus objetivos y respectivas acciones sectoriales.", 'error');
             $("#btnS_AlineacionObjetivo").removeAttr("disabled");
             loadInit($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+            return;
         }
-    };
+        showMsg("Enviando datos a base de datos.", 'info');
+        const valoresObjetivos = JSON.stringify(datosBD.arrayAcciones);
+        logger.log("VALORES PROCESADOS OBJETIVOS: ", valoresObjetivos);
+        fetchDataArr(75, { __listObjetivos: valoresObjetivos }, 0, function (response) {
+            if (response.flag) {
+                showMsg(response.msg, 'success');
+                loadInit($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
+                $("#modalAlineacionObjetivo").modal("hide");
+            } else {
+                showMsg(response.msg, 'error');
+            }
+        });
+        $("#btnS_AlineacionObjetivo").removeAttr("disabled");
+        gDoaaById(idCtrlAlineacion);
+    }
+
+    btn.onclick = enviarDatosAlineacion;
+
     if (___toEdit === 1) {
-        var html = '';
         $("#tableObjetivos").show();
         gDoaaById(idCtrlAlineacion);
     } else {

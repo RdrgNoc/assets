@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: evil-slayer.js
+const EVIL_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 const timingNoty = 3500;
 var idUser = $("#MainContent_hddnIdUsuario").val();
@@ -119,7 +123,8 @@ function getDataRiesgos(cveOS, cveUP, _eFiscal) {
                             if (item.CONSECUTIVO_INTERNO === null) {
                                 snDefine = '';
                             } else {
-                                snDefine = 'disabled';
+                                //snDefine = 'disabled';
+                                snDefine = '';
                             }
                         } else if (item.SN_VALIDA === false) {
                             valid__ = 'disabled';
@@ -152,13 +157,14 @@ function getDataRiesgos(cveOS, cveUP, _eFiscal) {
                     } else if (item.ID_ESTATUS === 2) {
                         defineDisabledBtnAdmin = 'disabled';
                     } else if (item.ID_ESTATUS === 3) {
-                        defineDisabledBtnAdmin = 'disabled';
+                        defineDisabledBtnAdmin = '';
                     } else if (item.ID_ESTATUS === 4) {
                         defineDisabledBtnAdmin = 'disabled';
                     } else if (item.ID_ESTATUS === 5) {
-                        defineDisabledBtnAdmin = '';
+                        defineDisabledBtnAdmin = 'disabled';
+                        snDefine = 'disabled';
                     } else if (item.ID_ESTATUS === 6) {
-                        defineDisabledBtnAdmin = '';
+                        defineDisabledBtnAdmin = 'disabled';
                     } else if (item.ID_ESTATUS === 7) {
                         defineDisabledBtnAdmin = 'disabled';
                     } else if (item.ID_ESTATUS === 8) {
@@ -293,7 +299,7 @@ function getDataRiesgos(cveOS, cveUP, _eFiscal) {
 function getDataRiesgosA(cveOS, cveUP, _eFiscal) {
     var html = '';
     blockUICustom();
-    fetchDataArr(0, { _OS: cveOS, _UP: cveUP, __eFiscal: _Efiscal }, 4, function (response) {
+    fetchDataArr(0, { _OS: cveOS, _UP: cveUP, __eFiscal: _eFiscal }, 4, function (response) {
         if (response) {
             logger.log(`%cRESPUESTA DATOS RIESGOS [ADMIN]`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
             logger.table(response);
@@ -492,7 +498,7 @@ function getDataRiesgosA(cveOS, cveUP, _eFiscal) {
 
 function gDdocMatriz(cveOS, cveUP, eFiscal) {
     blockUICustom();
-    fetchDataArr(4, { _OS: cveOS, _UP: cveUP, __eFiscal: eFiscal, __doConfig: 2 }, 4, function (response) {
+    fetchDataArr(4, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal, __doConfig: 2 }, 4, function (response) {
         if (response) {
             logger.log(`%cRESPUESTA REPORTE MATRIZ`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
             logger.table(response);
@@ -512,7 +518,7 @@ function gDdocMatriz(cveOS, cveUP, eFiscal) {
 
 function gDdocPtar(cveOS, cveUP, eFiscal) {
     blockUICustom();
-    fetchDataArr(4, { _OS: cveOS, _UP: cveUP, __eFiscal: eFiscal, __doConfig: 2 }, 4, function (response) {
+    fetchDataArr(5, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal, __doConfig: 2 }, 4, function (response) {
         if (response) {
             logger.log(`%cRESPUESTA REPORTE PTAR`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
             logger.table(response);
@@ -670,11 +676,11 @@ function gDdocChart(cveOS, cveUP, _type, __bytes, __class, _eFiscal) {
 
 function gDdocCon(cveOS, cveUP, eFiscal) {
     blockUICustom();
-    fetchDataArr(7, { _OS: cveOS, _UP: cveUP, __eFiscal: eFiscal, __doConfig: 2 }, 4, function (response) {
+    fetchDataArr(7, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal, __doConfig: 2 }, 4, function (response) {
         if (response) {
             logger.log(`%cRESPUESTA REPORTE CONCENTRADO ${response}`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
             if (response.length !== 0) {
-                var splitResult = result.split("|");
+                var splitResult = response.split("|");
                 if (splitResult[0] === "ok") {
                     showMsg("Mostrando reporte", 'success');
                     window.open('../../Reportes/WebFrmRpt.aspx', 'REPORTE', 'width=650,height=600,scrollbars=yes,toolbar=no,left=10,top=10,resizable=yes');
@@ -712,6 +718,7 @@ function gDob(idCtrlRiesgo) {
         if (response) {
             logger.log(`%cRESPUESTA OBSERVACIONES`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
             logger.table(response);
+            var disabled = "";
             if (response.length === 0) {
                 html2 += `<div class='row g-3 timeline timeline-info timeline-current pb-x1'>
                                       <div class='col-auto ps-4 ms-2'>
@@ -929,7 +936,7 @@ function getNotifications(_eFiscal) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-$(document).ready(async function () {
+$(document).ready(function () {
     s03.hide();
     loadEndpoints(4);
     obtenerSelectDatosEfiscal();
@@ -1025,10 +1032,10 @@ $(document).ready(async function () {
                                     logger.table(response);
                                     if (response !== 'error') {
                                         const conNulos = response.some(item => item.HAY_NULL === 1);
-                                        if (conNulos) {
-                                            showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
-                                            return;
-                                        }
+                                        // if (conNulos) {
+                                        //     showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
+                                        //     return;
+                                        // }
                                         gDdocMatriz(cveOS, cveUP, eFiscal);
                                     }
                                 }
@@ -1067,10 +1074,10 @@ $(document).ready(async function () {
                                     logger.table(response);
                                     if (response !== 'error') {
                                         const conNulos = response.some(item => item.HAY_NULL === 1);
-                                        if (conNulos) {
-                                            showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
-                                            return;
-                                        }
+                                        // if (conNulos) {
+                                        //     showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
+                                        //     return;
+                                        // }
                                         gDdocPtar(cveOS, cveUP, eFiscal);
                                     }
                                 }
@@ -1108,10 +1115,10 @@ $(document).ready(async function () {
                                     logger.table(response);
                                     if (response !== 'error') {
                                         const conNulos = response.some(item => item.HAY_NULL === 1);
-                                        if (conNulos) {
-                                            showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
-                                            return;
-                                        }
+                                        // if (conNulos) {
+                                        //     showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
+                                        //     return;
+                                        // }
                                         gDdocChart(cveOS, cveUP, 'printPage', 'null', 0, eFiscal);
                                     }
                                 }
@@ -1149,10 +1156,10 @@ $(document).ready(async function () {
                                     logger.table(response);
                                     if (response !== 'error') {
                                         const conNulos = response.some(item => item.HAY_NULL === 1);
-                                        if (conNulos) {
-                                            showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
-                                            return;
-                                        }
+                                        // if (conNulos) {
+                                        //     showMsg(`Valide e inserte sus numeros de control, antes de enviar o generar cualquier reporte.`, 'info');
+                                        //     return;
+                                        // }
                                         gDdocCon(cveOS, cveUP, eFiscal);
                                     }
                                 }
@@ -1286,7 +1293,7 @@ $(document).ready(async function () {
                     return;
                 } else {
                     blockUICustom();
-                    fetchDataArr(12, { _idCtrlAlineacion: idAlineacion, _idUser: idUser, _txtConsecutivo: txtNoConsecutivoData, _eFiscal, eFiscal }, 4, function (response) {
+                    fetchDataArr(12, { _idCtrlAlineacion: idAlineacion, _idUser: idUser, _txtConsecutivo: txtNoConsecutivoData, _eFiscal: eFiscal }, 4, function (response) {
                         if (response) {
                             logger.log(`%cRESPUESTA DE INSERCION NUMERO DE CONTROL ${response}`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
                             var splitResult = response.split("|");
@@ -1323,6 +1330,7 @@ $(document).ready(async function () {
                         const conNulos = response.some(item => item.HAY_NULL === 1);
 
                         const algunaNoValidada = response.some(item => (item.SN_VALIDA === null || item.SN_VALIDA === false));
+                        const estaEn3 = response.some(item => item.ID_ESTATUS === 3);
                         const noEstaEn6 = response.some(item => item.ID_ESTATUS === 6);
                         const noEstaEn5 = response.some(item => item.ID_ESTATUS === 5);
                         const idCtrlRiesgos = response.filter(item => item.ID_CTRL_RIESGO !== 0 && item.SN_VALIDA === true).map(item => item.ID_CTRL_RIESGO).join('|');
@@ -1334,7 +1342,7 @@ $(document).ready(async function () {
                             return;
                         }
 
-                        if (noEstaEn6) {
+                        if (estaEn3) {
                             if (conNulos) {
                                 showMsg(`Defina primero el orden de los riesgos.`, 'info');
                                 return;
@@ -1363,8 +1371,8 @@ $(document).ready(async function () {
                 } else if (response === "error") {
                     showMsg("Error al cargar datos", 'error');
                 }
-                Swal.close();
             });
+            Swal.close();
         }
     });
 
@@ -1545,15 +1553,25 @@ $(document).ready(async function () {
                 if (response) {
                     logger.log(`%cRESPUESTA DE ENVIO A REVISION DE RIESGOS`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
                     logger.table(response);
-                    if (response !== 'error') {
+                    if (response.length !== 0) {
                         const conNulos = response.some(item => item.HAY_NULL === 1);
                         const noEstatus7 = response.some(item => item.ID_ESTATUS !== 7);
-                        if (conNulos) {
-                            showMsg(`Espere a que asignen completamente los números de riesgos.`, 'info');
+                        const estaEn11 = response.some(item => item.ID_ESTATUS === 11);
+                        const noEstaEn5 = response.some(item => item.ID_ESTATUS !== 5);
+                        if (estaEn11) {
+                            showMsg(`Ya ha firmado, no puede volver a firmar.`, 'info');
+                            Swal.close();
                             return;
                         }
-                        if (noEstatus7) {
-                            showMsg(`Se ha firmado los reportes, lo sentimos.`, 'info');
+                        if (noEstaEn5) {
+                            showMsg(`Aún no recibe el cambio de estado de los riesgos.`, 'info');
+                            Swal.close();
+                            return;
+                        }
+
+                        if (conNulos) {
+                            showMsg(`Espere a que asignen completamente los números de riesgos.`, 'info');
+                            Swal.close();
                             return;
                         }
                         fetchDataArr(22, { _idUsuario: idUser, __idRol: idRolUser }, 4, function (reponseSign) {
@@ -1565,6 +1583,7 @@ $(document).ready(async function () {
                                     $("#modalFormSign").modal("show");
                                 } else {
                                     showMsg("Ocurrió un error al obtener los datos.", 'error');
+                                    Swal.close();
                                     return;
                                 }
                             } else if (reponseSign === "error") {
@@ -1615,11 +1634,11 @@ $(document).ready(async function () {
                     logger.log(`%cRESPUESTA DE RIESGOS COLOCAR REVISION INTERNO`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
                     logger.table(response);
                     if (response !== 'error') {
-                        const noEstaEn7 = response.some(item => item.ID_ESTATUS !== 7);
+                        const noEstaEn5 = response.some(item => item.ID_ESTATUS !== 5);
                         const idCtrlRiesgos = response.filter(item => item.ID_CTRL_RIESGO !== 0 && item.SN_VALIDA === true).map(item => item.ID_CTRL_RIESGO).join('|');
 
-                        if (noEstaEn7) {
-                            showMsg(`Antes de continuar con el envio, el riesgo debe de estar en estado de <strong>Revisado</strong>.`, 'info');
+                        if (noEstaEn5) {
+                            showMsg(`Antes de continuar con el envio, el riesgo debe de estar en estado de <strong>Para Ratificar</strong>.`, 'info');
                             $("#btnFirmarReports").removeAttr("disabled");
                             s03.hide();
                             clearForms(1);

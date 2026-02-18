@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: binding-slayer.js
+const BINDING_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 let timingNoty = 3500;
 let idUser = $("#MainContent_hddnIdUsuario").val();
@@ -15,7 +19,7 @@ const d = new Date();
 
 function gDrt(cveOS, cveUP, eFiscal, __rol) {
     var html = '';
-    fetchDataArr(4, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 3, function (response) {
+    fetchDataArr(4, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 2, function (response) {
         if (response) {
             logger.error("RESPUESTA REPORTES TRIMESTRALES: ", response);
             if (response !== 'error') {
@@ -193,7 +197,7 @@ function gDrt(cveOS, cveUP, eFiscal, __rol) {
 
 function gDra(cveOS, cveUP, eFiscal, __rol) {
     var html = '';
-    fetchDataArr(7, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 3, function (response) {
+    fetchDataArr(7, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 2, function (response) {
         if (response) {
             logger.error("RESPUESTA REPORTES ANUALES: ", response);
             if (response !== 'error') {
@@ -354,7 +358,7 @@ function gDra(cveOS, cveUP, eFiscal, __rol) {
 
 function gDrtAd(eFiscal) {
     var html = '';
-    fetchDataArr(20, { _eFiscal: eFiscal }, 3, function (response) {
+    fetchDataArr(20, { _eFiscal: eFiscal }, 2, function (response) {
         if (response) {
             logger.error("RESPUESTA REPORTES TRIMESTRALES GLOBAL: ", response);
             if (response !== 'error') {
@@ -436,7 +440,7 @@ function gDrtAd(eFiscal) {
 
 function gDraAd(eFiscal) {
     var html = '';
-    fetchDataArr(22, { _eFiscal: eFiscal }, 3, function (response) {
+    fetchDataArr(22, { _eFiscal: eFiscal }, 2, function (response) {
         if (response) {
             logger.error("RESPUESTA REPORTES ANUALES GLOBAL: ", response);
             if (response !== 'error') {
@@ -584,7 +588,7 @@ function gDraag(cveOS, cveUP, eFiscal, idReporte) {
 
 function gDorById(idCtrlReporte, tipoReporte) {
     var html = '';
-    fetchDataArr(17, { _idCtrlReporte: idCtrlReporte, _idTipoReporte: tipoReporte }, 3, function (response) {
+    fetchDataArr(17, { _idCtrlReporte: idCtrlReporte, _idTipoReporte: tipoReporte }, 2, function (response) {
         if (response) {
             logger.error("RESPUESTA OBSERVACIONES POR REPORTE: ", response);
             if (response !== 'error') {
@@ -617,7 +621,7 @@ function gDorById(idCtrlReporte, tipoReporte) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function sDrt(cveOS, cveUP, idUser, cboEfiscalReporteData, cboTrimestreReporteData, txtProblematicaData, txtPropuestaData, txtConclusionData, idCtrlReporteTrimestre) {
-    fetchDataArr(5, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _idTrimestre: cboTrimestreReporteData, _txtProblematica: txtProblematicaData, _txtPropuesta: txtPropuestaData, _txtConclusion: txtConclusionData, _idCtrlReporteTrimestral: idCtrlReporteTrimestre }, 3, function (response) {
+    fetchDataArr(5, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _idTrimestre: cboTrimestreReporteData, _txtProblematica: txtProblematicaData, _txtPropuesta: txtPropuestaData, _txtConclusion: txtConclusionData, _idCtrlReporteTrimestral: idCtrlReporteTrimestre }, 2, function (response) {
         if (response) {
             logger.log("Respuesta a INSERT REPORTE TRIMESTRAL:", response.split("|"));
             var responseS = response.split("|");
@@ -639,7 +643,7 @@ function sDrt(cveOS, cveUP, idUser, cboEfiscalReporteData, cboTrimestreReporteDa
 }
 
 function sDrtAd(cveOS, cveUP, idUser, cboEfiscalReporteData, cboTrimestreReporteData, txtProblematicaData, txtPropuestaData, txtConclusionData, idCtrlReporteTrimestre) {
-    fetchDataArr(21, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _idTrimestre: cboTrimestreReporteData, _txtProblematica: txtProblematicaData, _txtPropuesta: txtPropuestaData, _txtConclusion: txtConclusionData, _idCtrlReporteTrimestral: idCtrlReporteTrimestre }, 3, function (response) {
+    fetchDataArr(21, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _idTrimestre: cboTrimestreReporteData, _txtProblematica: txtProblematicaData, _txtPropuesta: txtPropuestaData, _txtConclusion: txtConclusionData, _idCtrlReporteTrimestral: idCtrlReporteTrimestre }, 2, function (response) {
         if (response) {
             logger.log("Respuesta a INSERT REPORTE TRIMESTRAL GLOBAL:", response.split("|"));
             var responseS = response.split("|");
@@ -661,7 +665,7 @@ function sDrtAd(cveOS, cveUP, idUser, cboEfiscalReporteData, cboTrimestreReporte
 }
 
 function sDra(cveOS, cveUP, idUser, cboEfiscalReporteData, txtConclusionData, idCtrlReporteAnual) {
-    fetchDataArr(8, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _txtConclusion: txtConclusionData, _idCtrlReporteAnual: idCtrlReporteAnual }, 3, function (response) {
+    fetchDataArr(8, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _txtConclusion: txtConclusionData, _idCtrlReporteAnual: idCtrlReporteAnual }, 2, function (response) {
         if (response) {
             logger.log("Respuesta a INSERT REPORTE ANUAL:", response.split("|"));
             var responseS = response.split("|");
@@ -683,7 +687,7 @@ function sDra(cveOS, cveUP, idUser, cboEfiscalReporteData, txtConclusionData, id
 }
 
 function sDraAd(cveOS, cveUP, idUser, cboEfiscalReporteData, txtConclusionData, idCtrlReporteAnual) {
-    fetchDataArr(23, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _txtConclusion: txtConclusionData, _idCtrlReporteAnual: idCtrlReporteAnual }, 3, function (response) {
+    fetchDataArr(23, { _OS: cveOS, _UP: cveUP, _eFiscal: cboEfiscalReporteData, _idUser: idUser, _txtConclusion: txtConclusionData, _idCtrlReporteAnual: idCtrlReporteAnual }, 2, function (response) {
         if (response) {
             logger.log("Respuesta a INSERT REPORTE ANUAL GLOBAL:", response.split("|"));
             var responseS = response.split("|");
@@ -705,7 +709,7 @@ function sDraAd(cveOS, cveUP, idUser, cboEfiscalReporteData, txtConclusionData, 
 }
 
 function vE(cveOS, cveUP, eFiscal, idTrimestre) {
-    fetchDataArr(19, { _idTrimestre: idTrimestre, _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 3, function (response) {
+    fetchDataArr(19, { _idTrimestre: idTrimestre, _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 2, function (response) {
         if (response) {
             logger.error("RESPUESTA DE VERIFICACIÓN DE EVIDENCIAS POR TRIMESTRE EN ACTIVIDADES: ", response);
             if (response !== 'error') {
@@ -735,7 +739,7 @@ function vE(cveOS, cveUP, eFiscal, idTrimestre) {
 
 function gDrepTri(idCtrlReporteT, Edit__) {
     const arrReturnMeses = [];
-    fetchDataArr(11, { _idCtrlReporteTrimestral: idCtrlReporteT }, 0, function (response) {
+    fetchDataArr(11, { _idCtrlReporteTrimestral: idCtrlReporteT }, 2, function (response) {
         if (response) {
             logger.log("Datos recibidos a REPORTE TRIMESTRAL BY ID:", response);
             if (response !== 'error') {
@@ -763,7 +767,7 @@ function gDrepTri(idCtrlReporteT, Edit__) {
 
 function gDrepAnu(idCtrlReporteA, Edit__) {
     const arrReturnMeses = [];
-    fetchDataArr(12, { _idCtrlReporteAnual: idCtrlReporteA }, 0, function (response) {
+    fetchDataArr(12, { _idCtrlReporteAnual: idCtrlReporteA }, 2, function (response) {
         if (response) {
             logger.log("Datos recibidos a REPORTE TRIMESTRAL BY ID:", response);
             if (response !== 'error') {
@@ -787,7 +791,7 @@ function gDrepAnu(idCtrlReporteA, Edit__) {
 
 function upReporte(idCtrlReporte, idUsuario, descObservacion, setReporte, setTipoReporte) {
     const arrReturnMeses = [];
-    fetchDataArr(16, { _idCtrlReporte: idCtrlReporte, _idUsuario: idUsuario, _descObservacion: descObservacion, _setReporte: setReporte, _setTipoReporte: setTipoReporte }, 0, function (response) {
+    fetchDataArr(16, { _idCtrlReporte: idCtrlReporte, _idUsuario: idUsuario, _descObservacion: descObservacion, _setReporte: setReporte, _setTipoReporte: setTipoReporte }, 2, function (response) {
         if (response) {
             logger.log("Datos recibidos a REPORTE VALIDACION:", response);
             var responseS = response.split("|");
@@ -812,12 +816,12 @@ function upReporte(idCtrlReporte, idUsuario, descObservacion, setReporte, setTip
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var obtenerSelectDatosEfiscal = function () {
-    fetchDataArr(0, {}, 1, function (response) {
+    fetchDataArr(0, {}, 2, function (response) {
         if (response) {
             const select = $("#cboEfiscal");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
             select.val(cveEfiscald);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -826,12 +830,12 @@ var obtenerSelectDatosEfiscal = function () {
 }
 
 var obtenerSelectDatosOS = function (txtEfiscal) {
-    fetchDataArr(1, { _txtEfiscal: txtEfiscal }, 1, function (response) {
+    fetchDataArr(1, { _txtEfiscal: txtEfiscal }, 2, function (response) {
         if (response) {
             const select = $("#cboOs");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
             select.val(cveOSd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -840,12 +844,12 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
 }
 
 var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
-    fetchDataArr(2, { _txtEfiscal: txtEfiscal, _txtOS: txtOS }, 1, function (response) {
+    fetchDataArr(2, { _txtEfiscal: txtEfiscal, _txtOS: txtOS }, 2, function (response) {
         if (response) {
             const select = $("#cboUp");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
             select.val(cveUPd === '' ? 0 : tipo === 'cambio' ? txtOS === cveOSd ? cveUPd : 0 : cveUPd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -854,7 +858,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
 }
 
 var gDfCtrimestre = function (id) {
-    fetchDataArr(3, {}, 1, function (response) {
+    fetchDataArr(3, {}, 2, function (response) {
         if (response) {
             const select = $("#cboTrimestreReporte");
             const select2 = $("#cboTrimestreReporteG");
@@ -862,7 +866,7 @@ var gDfCtrimestre = function (id) {
             select2.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
             select2.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", { value: item.ID_TRIMESTRE, text: item.DESC_TRIMESTRE }));
                 select2.append($("<option>", { value: item.ID_TRIMESTRE, text: item.DESC_TRIMESTRE }));
             });
@@ -915,7 +919,7 @@ $(document).ready(function () {
     if (idRolUser === '101') {
         logger.log("Usuario captura");
         $("#cboOs").attr("disabled", true);
-        $("#cboUp").attr("disabled", true);
+        $("#cboUp").attr("disabled", false);
         $("#btnN_ReporteTrimestral").show();
         $("#btnN_ReporteAnual").show();
         $("#btnReporteGlobalTrimestre").hide();
@@ -962,6 +966,32 @@ $(document).ready(function () {
                 gDra(cveOS, cveUP, eFiscal, idRolUser);
 
             } else if (idRolUser === '103' || idRolUser === '104') {
+                gDrt(cveOS, cveUP, eFiscal, idRolUser);
+                gDra(cveOS, cveUP, eFiscal, idRolUser);
+                gDrtAd(eFiscal);
+                gDraAd(eFiscal);
+            }
+        }
+    });
+
+    $(document).on("change", "#cboEfiscal", async function () {
+        var cveOS = $("#cboOs").val();
+        var cveUP = $("#cboUp").val();
+        var eFiscal = $("#cboEfiscal").val();
+
+        if (cveOS === 0 && cveUP === 0 || cveOS === '0' && cveUP === '0' || cveOS === "null" && cveUP === "null" || cveOS === null && cveUP === null) {
+            showMsg('Espere a obtener más datos...', 'alert');
+            return;
+        }
+
+        if (await verifyInitialDataOUE(cveOS, cveUP, eFiscal)) {
+            if (idRolUser === '101') {
+                gDrt(cveOS, cveUP, eFiscal, idRolUser);
+                gDra(cveOS, cveUP, eFiscal, idRolUser);
+
+            } else if (idRolUser === '103' || idRolUser === '104') {
+                gDrt(cveOS, cveUP, eFiscal, idRolUser);
+                gDra(cveOS, cveUP, eFiscal, idRolUser);
                 gDrtAd(eFiscal);
                 gDraAd(eFiscal);
             }
@@ -995,7 +1025,7 @@ $(document).ready(function () {
             //     return;
             // }
 
-            fetchDataArr(18, { _idTrimestre: $("#cboTrimestreReporte").val(), _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 3, function (response) {
+            fetchDataArr(18, { _idTrimestre: $("#cboTrimestreReporte").val(), _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 2, function (response) {
                 if (response) {
                     logger.error("RESPUESTA DE VERIFICACIÓN DE EVIDENCIAS POR TRIMESTRE EN ACTIVIDADES: ", response);
                     if (response !== 'error') {
@@ -1113,35 +1143,49 @@ $(document).ready(function () {
             idReturn = 0
         }
         if (await verifyInitialDataOUE(cveOS, cveUP, eFiscal)) {
-            fetchDataArr(19, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 3, function (response) {
-                if (response) {
-                    logger.error("RESPUESTA DE VERIFICACIÓN DE REPORTES TRIMESTRALES: ", response);
-                    if (response !== 'error') {
-                        if (response.length !== 0) {
-                            const algunoNoTieneReporteValidado = response.some(item => (item.SN_VALIDA === 0 || item.SN_VALIDA === null));
+            fetchDataArr(26, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 2, function (responseFactoresXMetas) {
+                if (responseFactoresXMetas.flag) {
+                    logger.log("DATOS DE VERIFICACION FACTOR POR META PROGRAMADA", responseFactoresXMetas);
+                    const factorSinMetaProgramada = responseFactoresXMetas.listData.some(item => item.CANTIDAD_CUANTITATIVA_P === null);
+                    const factorSinMetaAlcanzada = responseFactoresXMetas.listData.some(item => item.CANTIDAD_CUANTITATIVA_A === null);
+                    const queFactorSinMetaProgramada = responseFactoresXMetas.listData.filter(item => item.CANTIDAD_CUANTITATIVA_P === null).map(item => item.FOLIO).join(', ');
+                    const queFactorSinMetaAlcanzada = responseFactoresXMetas.listData.filter(item => item.CANTIDAD_CUANTITATIVA_A === null).map(item => item.FOLIO).join(', ');
+                    if (factorSinMetaProgramada) {
+                        showMsg(`Algunos factores no tienen meta programada: ${queFactorSinMetaProgramada}`, 'alert');
+                        return;
+                    }
+                    // if (factorSinMetaAlcanzada) {
+                    //     showMsg(`Algunos factores no tienen meta alcanzada: ${queFactorSinMetaAlcanzada}`, 'alert');
+                    //     return;
+                    // }
+
+                    fetchDataArr(19, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 2, function (response) {
+                        if (response.flag) {
+                            logger.log("DATOS DE VEDRIFICACION REPORTE ANUAL", response);
+                            const algunoNoTieneReporteValidado = response.listData.some(item => (item.SN_VALIDA === 0 || item.SN_VALIDA === null));
+                            const trimestresIncompletos = response.listData.some(item => item.EXISTE_TRIMESTRE === 0);
+                            const queTrimestreIncompleto = response.listData.filter(item => item.EXISTE_TRIMESTRE === 0).map(item => item.ID_TRIMESTRE).join(', ');
+                            if (trimestresIncompletos) {
+                                showMsg(`Algunos trimestres no tienen reporte: ${queTrimestreIncompleto}`, 'alert');
+                                return;
+                            }
                             if (algunoNoTieneReporteValidado) {
                                 showMsg('Sus reportes trimestrales, estan sin validar.', 'alert');
                                 return;
-                            } else {
-                                //if (validarFormularioReporteAnual() === true) {
-                                //const txtConclusionAData = $("#txtConclusionA").val().trim();
-                                const idCtrlReporteAnual = idReturn
-                                //sDra(cveOS, cveUP, idUser, eFiscal, txtConclusionAData, idCtrlReporteAnual);
-                                sDra(cveOS, cveUP, idUser, eFiscal, '', idCtrlReporteAnual);
-                                //}
                             }
+                            //if (validarFormularioReporteAnual() === true) {
+                            //const txtConclusionAData = $("#txtConclusionA").val().trim();
+                            const idCtrlReporteAnual = idReturn
+                            //sDra(cveOS, cveUP, idUser, eFiscal, txtConclusionAData, idCtrlReporteAnual);
+                            sDra(cveOS, cveUP, idUser, eFiscal, '', idCtrlReporteAnual);
+                            //}
                         } else {
-                            showMsg('Revise sus reportes trimestrales.', 'alert');
+                            showMsg(response.msg, 'error');
                             return;
                         }
-                        // const idCtrlReporteAnual = idReturn
-                        // //sDra(cveOS, cveUP, idUser, eFiscal, txtConclusionAData, idCtrlReporteAnual);
-                        // sDra(cveOS, cveUP, idUser, eFiscal, '', idCtrlReporteAnual);
-                    } else {
-                        return;
-                    }
-                } else if (response === "error") {
-                    return;
+                    });
+                } else {
+                    showMsg(responseFactoresXMetas.msg, 'error');
                 }
             });
         }

@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: scorn-slayer.js
+const SCORN_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 const timingNoty = 3500;
 var idUser = $("#MainContent_hddnIdUsuario").val();
@@ -13,23 +17,90 @@ const d = new Date();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// function validarMedida(valor, unidad) {
+//     const numero = parseFloat(valor);
+
+//     if (isNaN(numero)) return false;
+
+//     switch (unidad) {
+//         case '1':
+//             return numero >= 0 && numero <= 100;
+//         case '2':
+//             return Number.isInteger(numero) && numero >= 0 && numero <= 24;
+//         case '3':
+//             return Number.isInteger(numero) && numero >= 0 && numero <= 365;
+//         case '4':
+//             return Number.isInteger(numero) && numero >= 0;
+//         default:
+//             return false;
+//     }
+// }
+
 function validarMedida(valor, unidad) {
+
     const numero = parseFloat(valor);
 
-    if (isNaN(numero)) return false;
+    if (valor.trim() === '' || isNaN(numero)) {
+        showMsg("Debe ingresar un número válido.", 'error');
+        return false;
+    }
 
     switch (unidad) {
+
         case '1':
-            return numero >= 0 && numero <= 100;
+            if (numero <= 0) {
+                showMsg("El porcentaje debe ser mayor que 0.", 'error');
+                return false;
+            }
+            if (numero > 100) {
+                showMsg("El porcentaje no puede ser mayor a 100.", 'warning');
+                return false;
+            }
+            break;
+
         case '2':
-            return Number.isInteger(numero) && numero >= 0 && numero <= 24;
+            if (!Number.isInteger(numero)) {
+                showMsg("Las horas deben ser números enteros.", 'error');
+                return false;
+            }
+            if (numero <= 0) {
+                showMsg("Las horas no puden ser menores que 1.", 'warning');
+                return false;
+            }
+            break;
+
         case '3':
-            return Number.isInteger(numero) && numero >= 0 && numero <= 365;
+            if (!Number.isInteger(numero)) {
+                showMsg("Los días deben ser números enteros.", 'error');
+                return false;
+            }
+            if (numero <= 0) {
+                showMsg("Los días no puden ser menores que 1.", 'warning');
+                return false;
+            }
+            if (numero > 365) {
+                showMsg("Los días no pueden ser mayores a 365.", 'warning');
+                return false;
+            }
+            break;
+
         case '4':
-            return Number.isInteger(numero) && numero >= 0;
+            if (!Number.isInteger(numero)) {
+                showMsg("Las unidades deben ser números enteros.", 'error');
+                return false;
+            }
+            if (numero <= 0) {
+                showMsg("Las unidades deben ser mayores que 0.", 'warning');
+                return false;
+            }
+            break;
+
         default:
+            showMsg("Unidad de medida inválida.", 'error');
             return false;
     }
+
+    return true;
 }
 
 
@@ -43,7 +114,7 @@ var obtenerSelectDatosEfiscal = function () {
             const select = $("#cboEfiscal");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
             select.val(cveEfiscald);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -57,7 +128,7 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
             const select = $("#cboOs");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
             select.val(cveOSd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -71,7 +142,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
             const select = $("#cboUp");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
             select.val(cveUPd === '' ? 0 : tipo === 'cambio' ? txtOS === cveOSd ? cveUPd : 0 : cveUPd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -105,9 +176,9 @@ function gDfm(cveOS, cveUP, eFiscal) {
                 if (response.length !== 0) {
                     response.forEach(function (item) {
                         html += `<tr>
-                                    <td class='text-1000'>${item.FOLIO}</td>
-                                    <td class='text-1000'>${item.DESC_FACTOR}</td>
-                                    <td class='text-1000'>${item.POSIBLE_EFECTO}</td>
+                                    <td class='text-1000' style='width: 10%;'>${item.FOLIO}</td>
+                                    <td class='text-1000' style='width: 30%;'>${item.DESC_FACTOR}</td>
+                                    <td class='text-1000' style='width: 50%;'>${item.POSIBLE_EFECTO}</td>
                                     <td class='text-end'>
                                         <div>
                                             <button class='btn btn-sm btn-secondary btnEditMetaFactor customButton' type='button' data-ctrl-factor='${item.ID_CTRL_FACTOR}'>Insertar metas</button>
@@ -247,7 +318,7 @@ $(document).ready(function () {
     if (idRolUser === '101') {
         logger.log("Usuario captura");
         $("#cboOs").attr("disabled", true);
-        $("#cboUp").attr("disabled", true);
+        $("#cboUp").attr("disabled", false);
 
         gDfm(cveOSd, cveUPd, cveEfiscald);
     } else if (idRolUser === '201' || idRolUser === '301') {

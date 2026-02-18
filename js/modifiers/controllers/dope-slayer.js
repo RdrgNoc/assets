@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: dope-slayer.js
+const DOPE_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 const idUser = $("#MainContent_hddnIdUsuario").val();
 const idRolUser = $("#MainContent_hddnPage").val();

@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: dumbs-slayer.js
+const DUMBS_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 var idUser = $("#MainContent_hddnIdUsuario").val();
 var idRolUser = $("#MainContent_hddnPage").val();
@@ -55,7 +59,7 @@ var obtenerSelectDatosEfiscal = function () {
             const select = $("#cboEfiscal");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
             select.val(cveEfiscald);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -69,7 +73,7 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
             const select = $("#cboOs");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
             select.val(cveOSd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -83,7 +87,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
             const select = $("#cboUp");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
             if (cveUPd === '') {
                 select.val(0);
             } else {
@@ -406,11 +410,11 @@ $(document).ready(function () {
         var cveUP = $("#cboUp").val();
         var eFiscal = $("#cboEfiscal").val();
         if (idRolUser === '101') {
-            if (verifyInitialData(cveOS, cveUP, eFiscal)) { getReportesGA(eFiscal); }
+            if (verifyInitialDataOUE(cveOS, cveUP, eFiscal)) { getReportesGA(eFiscal); }
         } else if (idRolUser === '102') {
-            if (verifyInitialData(cveOS, cveUP, eFiscal)) { getReportesGAA(eFiscal); }
+            if (verifyInitialDataOUE(cveOS, cveUP, eFiscal)) { getReportesGAA(eFiscal); }
         } else if (idRolUser === '103') {
-            if (verifyInitialData(cveOS, cveUP, eFiscal)) { getReportesGAAA(eFiscal); }
+            if (verifyInitialDataOUE(cveOS, cveUP, eFiscal)) { getReportesGAAA(eFiscal); }
         }
     });
 
@@ -419,11 +423,11 @@ $(document).ready(function () {
         var cveUP = $("#cboUp").val();
         var eFiscal = $("#cboEfiscal").val();
         if (idRolUser === '101') {
-            if (verifyInitialData(cveOS, cveUP, eFiscal)) { getReportesGA(eFiscal); }
+            if (verifyInitialDataOUE(cveOS, cveUP, eFiscal)) { getReportesGA(eFiscal); }
         } else if (idRolUser === '102') {
-            if (verifyInitialData(cveOS, cveUP, eFiscal)) { getReportesGAA(eFiscal); }
+            if (verifyInitialDataOUE(cveOS, cveUP, eFiscal)) { getReportesGAA(eFiscal); }
         } else if (idRolUser === '103') {
-            if (verifyInitialData(cveOS, cveUP, eFiscal)) { getReportesGAAA(eFiscal); }
+            if (verifyInitialDataOUE(cveOS, cveUP, eFiscal)) { getReportesGAAA(eFiscal); }
         }
     });
 

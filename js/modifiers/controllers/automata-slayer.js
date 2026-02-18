@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: automata-slayer.js
+const AUTOMATA_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 var idUser = $("#MainContent_hddnIdUsuario").val();
 var idRolUser = $("#MainContent_hddnPage").val();

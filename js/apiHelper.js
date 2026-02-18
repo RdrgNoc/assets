@@ -1,6 +1,7 @@
 let API_ROUTES = null;
 let isFetchingEndpoints = false;
 let pendingRequests = [];
+let currentEndpointIndex = null;
 
 var _lo_l = [
     'WebFrmPTAR001.aspx/GetAuthorizedEndpoints', //[0] doom
@@ -19,24 +20,45 @@ var _lo_l = [
 
 window.loadEndpoints = function (index) {
     return new Promise((resolve, reject) => {
-        if (API_ROUTES !== null) {
+        // Validar índice
+        if (typeof index !== 'number' || index < 0 || index >= _lo_l.length) {
+            const errorMsg = `Índice de endpoint inválido: ${index}`;
+            logger.error(errorMsg);
+            reject(errorMsg);
+            return;
+        }
+
+        // Si ya se cargó para este índice, reutilizar
+        if (API_ROUTES !== null && currentEndpointIndex === index) {
             resolve(API_ROUTES);
             return;
         }
 
-        if (isFetchingEndpoints) {
+        // Si se está cargando para este índice, agregar a la cola
+        if (isFetchingEndpoints && currentEndpointIndex === index) {
             pendingRequests.push({ resolve, reject });
             return;
         }
 
         isFetchingEndpoints = true;
+        currentEndpointIndex = index;
         $.ajax({
-            url: _lo_l[index],
+            url: _lo_l[currentEndpointIndex],
             type: 'POST',
             contentType: 'application/json',
             dataType: 'json',
+            //timeout: 10000,
             success: function (response) {
-                API_ROUTES = JSON.parse(response.d);
+                try {
+                    API_ROUTES = JSON.parse(response.d);
+                } catch (e) {
+                    isFetchingEndpoints = false;
+                    logger.error("Error al parsear rutas:", e);
+                    reject(e);
+                    pendingRequests.forEach(req => req.reject(e));
+                    pendingRequests = [];
+                    return;
+                }
                 isFetchingEndpoints = false;
                 resolve(API_ROUTES);
                 pendingRequests.forEach(req => req.resolve(API_ROUTES));
@@ -44,9 +66,9 @@ window.loadEndpoints = function (index) {
                 logger.log("%cRUTAS DISPONIBLES EN ESTA PANTALLA", "background: rgba(255, 255, 255, 0.6); color: black;");
                 logger.table(API_ROUTES);
             },
-            error: function (error) {
+            error: function (error, textStatus) {
                 isFetchingEndpoints = false;
-                logger.error("ERROR AL OBTENER LAS RUTAS (endpoints):", error);
+                logger.error("ERROR AL OBTENER LAS RUTAS (endpoints):", error, textStatus);
                 reject(error);
                 pendingRequests.forEach(req => req.reject(error));
                 pendingRequests = [];
@@ -57,8 +79,10 @@ window.loadEndpoints = function (index) {
 
 window.fetchDataArr = function (endpointKey, data, z, onSuccess, method = 'POST') {
     loadEndpoints(z).then(() => {
-        if (!API_ROUTES[endpointKey]) {
-            logger.error(`%cRUTAS DISPONIBLES EN ESTA PANTALLA${endpointKey}`, "color: rgba(255, 50, 50, 0.2)");
+        if (!API_ROUTES || !API_ROUTES[endpointKey]) {
+            const errorMsg = `Endpoint no encontrado: ${endpointKey}`;
+            logger.error(errorMsg);
+            if (typeof onSuccess === 'function') onSuccess("error", []);
             return;
         }
         logger.log(`%c🎯 ${endpointKey} 💡 ${API_ROUTES[endpointKey].Item1}`, "color: hsla(71, 100%, 50%, 0.47)");
@@ -70,6 +94,7 @@ window.fetchDataArr = function (endpointKey, data, z, onSuccess, method = 'POST'
             dataType: 'json',
             data: JSON.stringify(data),
             async: true,
+            //timeout: 10000,
             success: function (result) {
                 if (Array.isArray(result.d)) {
                     onSuccess(result.d);
@@ -86,9 +111,11 @@ window.fetchDataArr = function (endpointKey, data, z, onSuccess, method = 'POST'
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 logger.error("Error en la petición:", textStatus, errorThrown);
+                if (typeof onSuccess === 'function') onSuccess("error", []);
             }
         });
     }).catch(error => {
         logger.error("Error en fetchData:", error);
+        if (typeof onSuccess === 'function') onSuccess("error", []);
     });
 }

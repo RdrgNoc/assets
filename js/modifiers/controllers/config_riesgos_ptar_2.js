@@ -1,4 +1,9 @@
-﻿'use strict';
+﻿
+// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: metroid-slayer.js
+const METROID_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 const timingNoty = 3500;
 var idUser = $("#MainContent_hddnIdUsuario").val();
@@ -534,13 +539,8 @@ function setDataEvidencia(dataLocal, idDocumento) {
 async function uploadFileInChunks(file, idCtrlActividad, idUsuario, idDocumento, txtDesc, fileExt, cveOS, cveUP, cveEfiscal) {
     blockUICustom({
         title: 'Guardando documento...',
-        html: '<div class="text-center"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">Por favor espere...<progress id="progressBar" value="0" max="100"></progress><span id="progressText"></span><span id="timeRemaining"></span></div></div>',
+        html: '<div class="text-center"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">Por favor espere...</div></div>',
         allowOutsideClick: false,
-        // didOpen: () => {
-        //     window.progressBar = document.getElementById("progressBar");
-        //     window.progressText = document.getElementById("progressText");
-        //     window.timeRemaining = document.getElementById("timeRemaining");
-        // }
     });
     const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
     const MAX_SIZE = 100 * 1024 * 1024; // 2MB
@@ -649,7 +649,7 @@ $(document).ready(function () {
     gDfCtrimestre(0);
     if (idRolUser === '101') {
         $("#cboOs").attr("disabled", true);
-        $("#cboUp").attr("disabled", true);
+        $("#cboUp").attr("disabled", false);
         $("#bntDownload").hide();
         logger.log("Usuario captura");
         getDataRiesgos(cveOSd, cveUPd, 0, cveEfiscald);
@@ -1042,7 +1042,7 @@ var obtenerSelectDatosEfiscal = function () {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", {
                     value: item.id_efiscal,
                     text: item.efiscal
@@ -1062,7 +1062,7 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", {
                     value: item.Cve_Organo_Superior,
                     text: item.Txt_Organo_Superior
@@ -1076,7 +1076,7 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select2.append($("<option>", {
                     value: item.Cve_Organo_Superior,
                     text: item.Txt_Organo_Superior
@@ -1098,7 +1098,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", {
                     value: item.Cve_Unidad_Presupuestal,
                     text: item.Txt_Unidad_Presupuestal
@@ -1125,7 +1125,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select2.append($("<option>", {
                     value: item.Cve_Unidad_Presupuestal,
                     text: item.Txt_Unidad_Presupuestal
@@ -1160,7 +1160,7 @@ var obtenerSelectDatosTipoReporte = function (id) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", {
                     value: item.ID_TIPO_REPORTE,
                     text: item.DESC_TIPO_REPORTE
@@ -1181,7 +1181,7 @@ var obtenerSelectDatosTipoDocumento = function (id) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", {
                     value: item.ID_TIPO_DOCUMENTO,
                     text: item.DESC_DOCUMENTO
@@ -1208,7 +1208,7 @@ var gDfCtrimestre = function (id) {
                 value: "0",
                 text: "SELECCIONE"
             }));
-            response.forEach(function (item) {
+            response.listData.forEach(function (item) {
                 select.append($("<option>", {
                     value: item.ID_TRIMESTRE,
                     text: item.DESC_TRIMESTRE

@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: rocket-slayer.js
+const ROCKET_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 var idUser = $("#MainContent_hddnIdUsuario").val();
 var idRolUser = $("#MainContent_hddnPage").val();
@@ -852,12 +856,21 @@ function gDaoList(eFiscal) {
                         var sumHtml = "";
                         var sumHtml2 = "";
                         var disabledBtn = "";
+                        var textColor = "";
+
+                        if (item.ID_ESTATUS === 6 || item.ID_ESTATUS > 6) {
+                            disabledBtn = "disabled";
+                            textColor = "text-secondary";
+                        } else {
+                            disabledBtn = "";
+                            textColor = "text-warning";
+                        }
 
                         if (idRolUser === '101') {
-                            sumHtml = `<a class='dropdown-item ${disabledBtn} text-secondary' type='button'>Sin accesos</a>`;
+                            sumHtml = `<a class='dropdown-item ${disabledBtn} ${textColor}' type='button'>Sin accesos</a>`;
                         } else {
-                            sumHtml = `<a class='dropdown-item ${disabledBtn} text-warning btnEditDatosArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Editar área</a>`;
-                            sumHtml2 = `<a class='dropdown-item ${disabledBtn} text-danger btnDeleteArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Eliminar área</a>`;
+                            sumHtml = `<a class='dropdown-item ${disabledBtn} ${textColor} btnEditDatosArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Editar área</a>`;
+                            sumHtml2 = `<a class='dropdown-item ${disabledBtn} ${textColor} btnDeleteArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Eliminar área</a>`;
                         }
 
                         html += `<tr class='btn-reveal-trigger'>
@@ -919,11 +932,11 @@ function gDrp1(eFiscal) {
                         var sumHtml = "";
                         var disabledBtn = "";
 
-                        if (item.ID_ESTATUS !== 7) {
+                        if (item.ID_ESTATUS === 1) {
                             disabledBtn = "";
                         } else if (item.ID_ESTATUS === 7) {
                             disabledBtn = "disabled";
-                        } if (item.ID_ESTATUS >= 8) {
+                        } else if (item.ID_ESTATUS < 7 || item.ID_ESTATUS > 7) {
                             disabledBtn = "disabled";
                         }
 
@@ -1284,7 +1297,7 @@ var obtenerSelectDatosEfiscal = function () {
             const select = $("#cboEfiscal");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
             select.val(cveEfiscald);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -1298,7 +1311,7 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
             const select = $("#cboOs");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
             select.val(cveOSd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -1312,7 +1325,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
             const select = $("#cboUp");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
             select.val(cveUPd === '' ? 0 : tipo === 'cambio' ? txtOS === cveOSd ? cveUPd : 0 : cveUPd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -1325,7 +1338,7 @@ var obtenerSelectDatosElemento = function () {
         if (response) {
             const select = $("#cboElemento");
             select.empty();
-            select.append($("<option>", { text: "SELECCIONE" }));
+            select.append($("<option>", { value: "0", text: "SELECCIONE" }));
             response.forEach(function (item) { select.append($("<option>", { value: item.ID_ELEMENTO_CONTROL, text: item.DESC_ELEMENTO_CONTROL })); });
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -1395,7 +1408,7 @@ var gDfCtrimestre = function (id) {
             const select = $("#cboTrimestreReporte");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.ID_TRIMESTRE, text: item.DESC_TRIMESTRE })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.ID_TRIMESTRE, text: item.DESC_TRIMESTRE })); });
             switch (d.getMonth()) {
                 case 0:
                 case 1:

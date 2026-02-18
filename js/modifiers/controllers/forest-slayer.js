@@ -1,4 +1,8 @@
-﻿'use strict';
+﻿// ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
+// Versión del archivo: forest-slayer.js
+const FOREST_SLAYER_VERSION = '1.0.0';
+
+'use strict';
 
 var idUser = $("#MainContent_hddnIdUsuario").val();
 var idRolUser = $("#MainContent_hddnPage").val();
@@ -55,7 +59,7 @@ var obtenerSelectDatosEfiscal = function () {
             const select = $("#cboEfiscal");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.id_efiscal, text: item.efiscal })); });
             select.val(cveEfiscald);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -69,7 +73,7 @@ var obtenerSelectDatosOS = function (txtEfiscal) {
             const select = $("#cboOs");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Organo_Superior, text: item.Txt_Organo_Superior })); });
             select.val(cveOSd);
         } else if (response === "error") {
             showMsg("Error al cargar datos", 'error');
@@ -83,7 +87,7 @@ var obtenerSelectDatosUP = function (txtEfiscal, txtOS, tipo) {
             const select = $("#cboUp");
             select.empty();
             select.append($("<option>", { value: "0", text: "SELECCIONE" }));
-            response.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
+            response.listData.forEach(function (item) { select.append($("<option>", { value: item.Cve_Unidad_Presupuestal, text: item.Txt_Unidad_Presupuestal })); });
             if (cveUPd === '') {
                 select.val(0);
             } else {
@@ -151,6 +155,10 @@ function getReportesGA(eFiscal) {
                                                     data-ctrl-reporte='${item.ID_CTRL_REPORTE}' 
                                                     data-reporte='${item.ID_REPORTE}'
                                                     data-nivel='1'>Firmar reporte</button>
+                                                <button class='btn btn-sm btn-falcon-primary btnPreviewReport customButton m-1' type='button' 
+                                                    data-ctrl-reporte='${item.ID_CTRL_REPORTE}' 
+                                                    data-reporte='${item.ID_REPORTE}'
+                                                    data-nivel='1'>Previsualizar reporte</button>
                                                 ${sumHtml}
                                             </div>
                                         </td>
@@ -387,21 +395,49 @@ $(document).ready(function () {
         const idReturn = $(this)[0].dataset.ctrlId;
         var eFiscal = $("#cboEfiscal").val();
         if (await verifyInitialDataE(eFiscal)) {
-            fetchDataArr(5, { _idReporte: idReturn, _idUser: idUser, _eFiscal: eFiscal }, 8, function (response) {
-                if (response) {
-                    logger.log(`%cDatos devueltos sobre INSERT NUEVO CTRL REPORTE ${response}`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
-                    var responseS = response.split("|");
-                    if (responseS[0] === "ok") {
-                        showMsg("Se inserto correctamente los datos.", 'success');
-                        $("#modalComentarioForm").modal("hide");
-                    } else if (responseS[0] === "error") {
-                        showMsg("Ocurrio un error al insertar los datos.", 'error');
-                    } else if (responseS[0] === "existe") {
-                        showMsg("Detectamos que existe datos similares.", 'error');
+            fetchDataArr(9, { _eFiscal: eFiscal, _idRolUser: idRolUser }, 8, function (verifyResponse) {
+                if (verifyResponse.flag) {
+                    const upSinRiesgos = verifyResponse.listData.some(item => item.TOTAL_RIESGOS === 0);
+                    const upSinFirmas = verifyResponse.listData.some(item => item.RIESGOS_FIRMADOS === 0);
+                    const unidadIncompleta = verifyResponse.listData.some(item => (item.TOTAL_RIESGOS !== item.RIESGOS_FIRMADOS) || (item.TOTAL_RIESGOS === 0 && item.RIESGOS_FIRMADOS === 0));
+                    const unidadesIncompletas = verifyResponse.listData.filter(item => (item.TOTAL_RIESGOS !== item.RIESGOS_FIRMADOS) || (item.TOTAL_RIESGOS === 0 && item.RIESGOS_FIRMADOS === 0)).map(item => item.Cve_Unidad_Presupuestal).join(', ');
+                    if (upSinRiesgos) {
+                        showMsg("Algunas unidades, aun no capturan sus riesgos o no tiene ninguna información. Comuniquese con las áreas, se necesitan de todas las áreas para crear el documento oficial", 'error');
+                        if (unidadIncompleta) {
+                            showMsg(`Unidades incompletas de su información: ${unidadesIncompletas}`, 'error');
+                        }
+                        return;
                     }
-                    getReportesGA(eFiscal);
-                } else if (response === "error") {
-                    showMsg("Error al cargar datos", 'error');
+                    if (upSinFirmas) {
+                        showMsg("Algunas unidades presupuestales, faltan por firmar sus riesgos.", 'error');
+                        if (unidadIncompleta) {
+                            showMsg(`Unidades incompletas de su información: ${unidadesIncompletas}`, 'error');
+                        }
+                        return;
+                    }
+                    if (unidadIncompleta) {
+                        showMsg(`Unidades incompletas de su información: ${unidadesIncompletas}`, 'error');
+                        return;
+                    }
+                    fetchDataArr(5, { _idReporte: idReturn, _idUser: idUser, _eFiscal: eFiscal }, 8, function (response) {
+                        if (response) {
+                            logger.log(`%cDatos devueltos sobre INSERT NUEVO CTRL REPORTE ${response}`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
+                            var responseS = response.split("|");
+                            if (responseS[0] === "ok") {
+                                showMsg("Se inserto correctamente los datos.", 'success');
+                                $("#modalComentarioForm").modal("hide");
+                            } else if (responseS[0] === "error") {
+                                showMsg("Ocurrio un error al insertar los datos.", 'error');
+                            } else if (responseS[0] === "existe") {
+                                showMsg("Detectamos que existe datos similares.", 'error');
+                            }
+                            getReportesGA(eFiscal);
+                        } else if (response === "error") {
+                            showMsg("Error al cargar datos", 'error');
+                        }
+                    });
+                } else {
+                    showMsg(verifyResponse.msg, 'error');
                 }
             });
         }
@@ -426,6 +462,26 @@ $(document).ready(function () {
                 }
             } else if (reponseSign === "error") {
                 showMsg("Error al cargar datos", 'error');
+            }
+        });
+    });
+
+    $(document).on("click", ".btnPreviewReport", async function () {
+        const idReturn = $(this)[0].dataset.ctrlReporte;
+        const idReturn2 = $(this)[0].dataset.reporte;
+        const idReturn3 = $(this)[0].dataset.nivel;
+        var cveOS = $("#cboOs").val();
+        var cveUP = $("#cboUp").val();
+        var eFiscal = $("#cboEfiscal").val();
+        if (!await verifyInitialDataOUE(cveOS, cveUP, eFiscal)) { return; }
+        fetchDataArr(10, { _eFiscal: eFiscal, _idReporte: idReturn2 }, 8, function (response) {
+            if (response.flag) {
+                logger.log(`%cRESPUESTA PREVISUALIZACION DE REPORTE`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
+                logger.log(response)
+                showMsg(response.msg, 'success');
+                saveByteArray(response.fileName, base64ToArrayBuffer(response.fileLength), 'application/pdf');
+            } else if (response === "error") {
+                showMsg(response.msg, 'error');
             }
         });
     });
