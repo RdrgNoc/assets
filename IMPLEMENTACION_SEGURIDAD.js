@@ -113,7 +113,7 @@ function gDaoSecure(eFiscal) {
 
 // Integración en document.ready si se usa jQuery
 if (typeof jQuery !== 'undefined') {
-    jQuery(async function () {
+    $(async function () {
         const val = await gettinValidatePage(AUTOMATA_SLAYER_VERSION);
         if (!val) {
             showMsg('La pantalla esta obsoleta, favor de actualizar o dar clic <a href="#" onclick="location.reload(); return false;">aquí</a>. Si persiste el problema, contacte al administrador del sistema.', 'alert');
