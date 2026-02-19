@@ -1,0 +1,334 @@
+================================================================================
+INSTRUCCIONES PARA VB.NET WebForms
+================================================================================
+
+Has migrado de código C# a VB.NET porque usas WebForms con VB.NET.
+Aquí están los pasos específicos para tu ambiente.
+
+================================================================================
+1. DÓNDE COLOCAR ServerSecurityHelper.vb
+================================================================================
+
+Opción A: Como archivo separado en una carpeta App_Code
+    - Copia ServerSecurityHelper.vb a: App_Code/Security/ServerSecurityHelper.vb
+    - VB.NET compilará automáticamente archivos en App_Code
+    - No necesita Build Project
+
+Opción B: Dentro de tu proyecto compilado
+    - Copia ServerSecurityHelper.vb a: tu proyecto raíz o carpeta Models
+    - Build del proyecto
+    - Luego puedes referenciar con: Imports PTAR.Security
+
+Opción C: Pegado en Code-Behind (si es archivo pequeño)
+    - Copia el contenido del namespace a tu archivo .aspx.vb
+    - No necesita Build
+
+
+================================================================================
+2. USAR ServerSecurityHelper EN TU CÓDIGO .ASPX.VB
+================================================================================
+
+En el inicio de tu archivo Code-Behind:
+
+    Imports PTAR.Security
+    Partial Class pages_alineacion
+        Inherits Page
+
+        Protected Sub btnGuardar_Click(sender As Object, e As EventArgs) Handles btnGuardar.Click
+            Try
+                ' OBTENER DATOS DEL FORMULARIO
+                Dim idAlineacion As Integer = Integer.Parse(hidIdAlineacion.Value)
+                Dim descripcion As String = txtAlineacion.Text
+                Dim eFiscal As String = ddlAno.SelectedValue
+                Dim cveOS As String = ddlOS.SelectedValue
+                Dim cveUP As String = ddlUP.SelectedValue
+                Dim jsVersion As String = Request("_jsVersion")
+
+                ' VALIDAR CON LON HELPER
+                Dim validation As ServerSecurityHelper.ValidationResult = 
+                    ServerSecurityHelper.ValidateFormAlineacion(
+                        idAlineacion.ToString(),
+                        descripcion,
+                        eFiscal,
+                        cveOS,
+                        cveUP,
+                        jsVersion
+                    )
+
+                ' SI HAY ERRORES, MOSTRAR Y SALIR
+                If Not validation.IsValid Then
+                    ServerSecurityHelper.LogSecurityEvent("VALIDATION_FAILED", 
+                        New With {.errors = validation.Errors})
+                    ClientScript.RegisterStartupScript(Me.GetType(), "alert", 
+                        "alert('" & validation.GetErrorString() & "');", True)
+                    Return
+                End If
+
+                ' VALIDAR PERMISO DEL USUARIO
+                Dim idUser As Integer = CInt(Session("idUser"))
+                If Not ServerSecurityHelper.ValidateUserAccess(idUser, idAlineacion, "ALINEACION") Then
+                    ServerSecurityHelper.LogSecurityEvent("UNAUTHORIZED_ACCESS", 
+                        New With {.userId = idUser, .resourceId = idAlineacion})
+                    ClientScript.RegisterStartupScript(Me.GetType(), "alert", 
+                        "alert('No tienes permiso');", True)
+                    Return
+                End If
+
+                ' GUARDAR EN BASE DE DATOS CON PARÁMETROS
+                Dim connectionString As String = 
+                    System.Configuration.ConfigurationManager.ConnectionStrings("PtarConnection").ConnectionString
+                
+                Using conn As New SqlConnection(connectionString)
+                    Dim cmd As New SqlCommand(
+                        "INSERT INTO ALINEACIONES (idAlineacion, descripcion, efiscal, cveOS, cveUP) " &
+                        "VALUES (@idAlineacion, @descripcion, @efiscal, @cveOS, @cveUP)",
+                        conn
+                    )
+
+                    ' ✅ CORRECTO: USAR PARÁMETROS
+                    cmd.Parameters.AddWithValue("@idAlineacion", idAlineacion)
+                    cmd.Parameters.AddWithValue("@descripcion", descripcion)
+                    cmd.Parameters.AddWithValue("@efiscal", eFiscal)
+                    cmd.Parameters.AddWithValue("@cveOS", cveOS)
+                    cmd.Parameters.AddWithValue("@cveUP", cveUP)
+
+                    conn.Open()
+                    cmd.ExecuteNonQuery()
+                    conn.Close()
+                End Using
+
+                ' REGISTRAR EN AUDITORÍA
+                ServerSecurityHelper.LogSecurityEvent("ALINEACION_CREATED", 
+                    New With {.idAlineacion = idAlineacion, .usuario = Session("nombreUsuario")})
+
+                ' MOSTRAR ÉXITO
+                ClientScript.RegisterStartupScript(Me.GetType(), "alert", 
+                    "alert('Guardado correctamente');", True)
+
+            Catch ex As Exception
+                ' LOGUEAR ERROR SIN MOSTRAR DETALLES AL USUARIO
+                ServerSecurityHelper.LogSecurityEvent("ERROR", 
+                    New With {.error = ex.Message, .stackTrace = ex.StackTrace})
+                ClientScript.RegisterStartupScript(Me.GetType(), "alert", 
+                    "alert('Error al guardar');", True)
+            End Try
+        End Sub
+
+    End Class
+
+
+================================================================================
+3. VALIDACIONES INDIVIDUALES EN FUNCIONES
+================================================================================
+
+El ServerSecurityHelper.vb tiene funciones individuales que puedes usar:
+
+    ' Validar un año fiscal
+    If Not ServerSecurityHelper.ValidateEfiscal(eFiscal) Then
+        ' Error: año fiscal inválido
+    End If
+
+    ' Validar un número en rango
+    If Not ServerSecurityHelper.ValidateNumber(idAlineacion, 1, 10000) Then
+        ' Error: número fuera de rango
+    End If
+
+    ' Validar una cadena contra SQL injection
+    If Not ServerSecurityHelper.ValidateSafeString(descripcion, 500) Then
+        ' Error: posible SQL injection o caracteres peligrosos
+    End If
+
+    ' Validar con patrón regex
+    If Not ServerSecurityHelper.ValidatePattern("EMAIL", emailAddress) Then
+        ' Error: email no válido
+    End If
+
+    ' Validar una fecha ISO
+    If Not ServerSecurityHelper.ValidateDate(fechaString) Then
+        ' Error: fecha no válida
+    End If
+
+    ' Validar email
+    If Not ServerSecurityHelper.ValidateEmail(emailAddress) Then
+        ' Error: email no válido
+    End If
+
+    ' Validar la versión del JS
+    If Not ServerSecurityHelper.ValidateJsVersion(jsVersionFromClient, "1.0.0") Then
+        ' Error: versión no coincide
+    End If
+
+    ' Generar y verificar checksum
+    Dim dataJson As String = JsonConvert.SerializeObject(datos)
+    Dim checksum As String = ServerSecurityHelper.GenerateChecksum(dataJson)
+    
+    If Not ServerSecurityHelper.VerifyDataChecksum(dataJson, checksumFromClient) Then
+        ' Error: datos fueron modificados
+    End If
+
+
+================================================================================
+4. PARÁMETROS SQL CORRECTAMENTE EN VB.NET
+================================================================================
+
+❌ INCORRECTO (vulnerable a SQL injection):
+    Dim sql As String = "SELECT * FROM USUARIOS WHERE idUser = " & idUser
+    cmd.CommandText = sql
+
+✅ CORRECTO (seguro):
+    Dim sql As String = "SELECT * FROM USUARIOS WHERE idUser = @idUser"
+    cmd.CommandText = sql
+    cmd.Parameters.AddWithValue("@idUser", idUser)
+
+Otro ejemplo:
+
+    ' INCORRECTO
+    cmd.CommandText = "INSERT INTO ALINEACIONES (descripcion) VALUES ('" & descripcion & "')"
+
+    ' CORRECTO
+    cmd.CommandText = "INSERT INTO ALINEACIONES (descripcion) VALUES (@descripcion)"
+    cmd.Parameters.AddWithValue("@descripcion", descripcion)
+
+
+================================================================================
+5. ARCHIVOS JAVASCRIPT QUE ACOMPAÑAN A TU VB.NET
+================================================================================
+
+Junto con ServerSecurityHelper.vb, tienes en el lado JavaScript:
+
+1. securityHelper.js - Validación y encoding en cliente
+   - sanitizeInput()
+   - isValidNumber()
+   - isValidDate()
+   - isValidEmail()
+   - encodeHTML()
+   - encodeURL()
+   - validateAndPrepareData()
+   - prepareSecureData()
+   - generateDataChecksum()
+   - monitorCSPViolations()
+
+2. IMPLEMENTACION_SEGURIDAD.js - Ejemplos de cómo usar seguridad en JS
+
+3. ServerSecurityHelper.vb - Validación en servidor (lo que acabamos de hacer)
+
+FLUJO COMPLETO:
+    Cliente (JS) → Valida con securityHelper.js → Envía datos
+    Servidor (VB) → Valida con ServerSecurityHelper.vb → Guarda en BD
+
+
+================================================================================
+6. PASOS PARA INTEGRAR EN TU PROYECTO
+================================================================================
+
+PASO 1: Copiar ServerSecurityHelper.vb
+    □ Copia el archivo a: App_Code/Security/ o tu carpeta de Models
+
+PASO 2: Verificar Imports en tus Code-Behind
+    Adds al inicio de cada .aspx.vb:
+    □ Imports PTAR.Security
+    □ Imports System.Data.SqlClient
+    □ Imports Newtonsoft.Json (si no lo tienes ya)
+
+PASO 3: Incluir securityHelper.js en tus páginas ASPX
+    □ En tu Master Page o en cada ASPX <head>:
+      <script src="/Content/assets/js/securityHelper.js"></script>
+      (ANTES de otros scripts)
+
+PASO 4: Actualizar tus funciones un controlador a la vez
+    □ Alineaciones.aspx → Agregar validación
+    □ AlternativasRiesgo.aspx → Agregar validación
+    □ Etc.
+
+PASO 5: Probar y verificar
+    □ Intentar SQL injection: ' OR '1'='1
+    □ Intentar XSS: <script>alert('XSS')</script>
+    □ Ver logs de seguridad
+
+
+================================================================================
+7. PREGUNTAS FRECUENTES
+================================================================================
+
+P: ¿Dónde pongo ServerSecurityHelper.vb?
+R: App_Code/Security/ServerSecurityHelper.vb es lo más limpio
+
+P: ¿Necesito compilar?
+R: Si está en App_Code, NO. Si está en una carpeta del proyecto, SÍ.
+
+P: ¿Podría tener errores de namespace?
+R: Si ves "PTAR.Security no encontrado", asegúrate de:
+   - El archivo está en App_Code (o compilado)
+   - Los Imports están agregatded
+   - Hizo Build del proyecto
+
+P: ¿Qué es Newtonsoft.Json?
+R: Es una librería para trabajar con JSON en .NET. Instálala vía NuGet:
+   Install-Package Newtonsoft.Json
+
+P: ¿Necesito cambiar mis conexiones SQL?
+R: Solo agrega parámetros en lugar de concatenar strings. Los ejemplos 
+   muestran cómo.
+
+P: ¿Qué hago con los archivos C# que creé antes?
+R: Ignora ServerSecurityHelper.cs (ese era para C#).
+   Usa ServerSecurityHelper.vb (ese es para VB.NET).
+
+P: ¿Cómo valido múltiples campos?
+R: Usa ValidateFormAlineacion() que valida 5 campos a la vez.
+   O llama funciones individuales para campos específicos.
+
+
+================================================================================
+8. SINTAXIS VB.NET VS C# (Referencia Rápida)
+================================================================================
+
+VB.NET                              C#
+--------                            --
+
+Public Class                        public class
+Public Sub                          public void
+Public Function                     public (return type)
+As Integer                          : int
+As String                           : string
+As Boolean                          : bool
+If ... Then ... Else ... End If     if (...) { ... } else { ... }
+For Each ... In ... Next            foreach (... in ...) { ... }
+Try ... Catch ... End Try           try { ... } catch { ... }
+Using ... End Using                 using (...) { ... }
+Dim variable As Type                [type] variable
+= vs :=                             = (solo asignación)
+New Dictionary(Of K, V)             new Dictionary<K, V>
+String.IsNullOrEmpty                string.IsNullOrEmpty
+AndAlso / OrElse                    && / ||
+Not                                 !
+
+
+================================================================================
+9. CHANGELOG - QUÉ CAMBIÓ
+================================================================================
+
+Antes (C#):
+    - ServerSecurityHelper.cs → VB.NET users no lo podían usar directamente
+    - IMPLEMENTACION_SEGURIDAD.js tenía código C# mezclado
+
+Ahora (VB.NET):
+    + ServerSecurityHelper.vb → Compatible con tus WebForms VB.NET
+    + Ejemplos en IMPLEMENTACION_SEGURIDAD.js son solo JavaScript
+    + Ejemplo de uso en comentarios del .vb (sintaxis VB.NET)
+    + Más fácil copiar y pegar
+
+
+================================================================================
+SIGUIENTE PASO
+================================================================================
+
+Abre ServerSecurityHelper.vb y IMPLEMENTACION_SEGURIDAD.js
+Elige uno de tus formularios (por ejemplo, Alineacion.aspx)
+Sigue el ejemplo en el comentario de ServerSecurityHelper.vb
+Implementa validación en ese formulario
+Prueba con datos normales y datos maliciosos
+¡Listo!
+
+Si necesitas ayuda con VB.NET, pregunta. Estoy aquí para convertir
+cualquier ejemplo de C# que necesites.

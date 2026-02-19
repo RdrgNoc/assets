@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Seguridad - Prevención de Vulnerabilidades</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1a73e8;
+            border-bottom: 3px solid #1a73e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #1a73e8;
+            margin-top: 30px;
+        }
+
+        h3 {
+            color: #34a853;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .code-block {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .example {
+            background-color: #e8f4f8;
+            border-left: 4px solid #0284c7;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .step {
+            background-color: #f0f4ff;
+            border-left: 4px solid #1a73e8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .vulnerable {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .secure {
+            color: #388e3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔐 Guía Completa de Seguridad - Prevención de Vulnerabilidades</h1>
+
+        <div class="warning-box">
+            <strong>⚠️ IMPORTANTE:</strong> La seguridad es responsabilidad tanto del cliente (JavaScript) como del
+            servidor (backend).
+            Este documento cubre la seguridad en el lado del cliente. <strong>El servidor DEBE validar SIEMPRE</strong>
+            todos los datos recibidos.
+        </div>
+
+        <h2>📋 Tabla de Contenidos</h2>
+        <ol>
+            <li>Incluir el archivo de seguridad</li>
+            <li>Sanitización y validación de entradas</li>
+            <li>Codificación de salida (Output Encoding)</li>
+            <li>Configuración de CSP (Content Security Policy)</li>
+            <li>Ejemplos prácticos</li>
+            <li>Checklist de seguridad</li>
+        </ol>
+
+        <!-- SECCIÓN 1 -->
+        <h2>1️⃣ Incluir el Archivo de Seguridad</h2>
+        <p>Primero, agrega el archivo de seguridad a tu HTML. Debe cargarse <strong>ANTES</strong> de otros scripts:</p>
+
+        <div class="code-block">&lt;!-- En el &lt;head&gt; o antes de otros scripts --&gt;
+            &lt;script src="/Content/assets/js/securityHelper.js"&gt;&lt;/script&gt;
+
+            &lt;!-- LUEGO tus otros scripts --&gt;
+            &lt;script src="/Content/assets/js/apiHelper.js"&gt;&lt;/script&gt;
+            &lt;script src="/Content/assets/js/modifiers/controllers/automata-slayer.js"&gt;&lt;/script&gt;</div>
+
+        <!-- SECCIÓN 2 -->
+        <h2>2️⃣ Sanitización y Validación de Entradas (Prevención de Inyección SQL y XSS)</h2>
+
+        <h3>¿Por qué es importante?</h3>
+        <p>La sanitización y validación evitan que usuarios malintencionados inyecten código malicioso.</p>
+
+        <h3>Funciones disponibles:</h3>
+        <table>
+            <tr>
+                <th>Función</th>
+                <th>Descripción</th>
+                <th>Ejemplo</th>
+            </tr>
+            <tr>
+                <td><code>sanitizeInput(text)</code></td>
+                <td>Elimina caracteres peligrosos de una cadena</td>
+                <td><code>sanitizeInput("'; DROP TABLE--")</code> → "DROP TABLE"</td>
+            </tr>
+            <tr>
+                <td><code>isValidNumber(value, min, max)</code></td>
+                <td>Valida que sea número dentro de rango</td>
+                <td><code>isValidNumber(2025, 2020, 2030)</code> → true</td>
+            </tr>
+            <tr>
+                <td><code>isValidEmail(email)</code></td>
+                <td>Valida formato de email</td>
+                <td><code>isValidEmail("user@example.com")</code> → true</td>
+            </tr>
+            <tr>
+                <td><code>isAlphanumeric(text)</code></td>
+                <td>Solo letras, números, guiones</td>
+                <td><code>isAlphanumeric("ABC-123")</code> → true</td>
+            </tr>
+            <tr>
+                <td><code>isValidDate(date)</code></td>
+                <td>Valida formato YYYY-MM-DD</td>
+                <td><code>isValidDate("2025-02-18")</code> → true</td>
+            </tr>
+        </table>
+
+        <h3>Ejemplo: Validación de entrada de usuario</h3>
+        <div class="example">
+            <strong>❌ ANTES (Vulnerable):</strong>
+            <div class="code-block">// Esto es inseguro - el usuario puede inyectar SQL
+                var nombreUsuario = $("#txtNombre").val();
+                var datos = { nombre: nombreUsuario };
+                fetchDataArr(0, datos, 9, function(response) { ... });</div>
+
+            <strong>✅ DESPUÉS (Seguro):</strong>
+            <div class="code-block">// Definir reglas de validación
+                const rules = {
+                nombre: {
+                type: 'string',
+                required: true,
+                minLength: 3,
+                maxLength: 50
+                }
+                };
+
+                // Obtener y validar entrada
+                const input = { nombre: $("#txtNombre").val() };
+                const validation = validateAndPrepareData(input, rules);
+
+                if (!validation.valid) {
+                showMsg(validation.errors.join(', '), 'error');
+                return;
+                }
+
+                // Si es válido, enviar al servidor
+                const secureData = prepareSecureData(
+                validation.data,
+                AUTOMATA_SLAYER_VERSION
+                );
+                fetchDataArr(0, secureData, 9, function(response) { ... });</div>
+        </div>
+
+        <!-- SECCIÓN 3 -->
+        <h2>3️⃣ Codificación de Salida (Output Encoding)</h2>
+
+        <h3>¿Por qué es importante?</h3>
+        <p>Al mostrar datos en HTML, CSS, JavaScript o URLs, deben estar codificados para prevenir XSS (Cross-Site
+            Scripting).</p>
+
+        <h3>Funciones disponibles:</h3>
+        <table>
+            <tr>
+                <th>Función</th>
+                <th>Uso</th>
+                <th>Ejemplo</th>
+            </tr>
+            <tr>
+                <td><code>encodeHTML(text)</code></td>
+                <td>Mostrar texto en HTML</td>
+                <td><code>encodeHTML("&lt;script&gt;")</code> → "&amp;lt;script&amp;gt;"</td>
+            </tr>
+            <tr>
+                <td><code>encodeAttribute(text)</code></td>
+                <td>Usar en atributos HTML</td>
+                <td><code>encodeAttribute('data"test')</code> → 'data&quot;test'</td>
+            </tr>
+            <tr>
+                <td><code>encodeURL(url)</code></td>
+                <td>Codificar parámetros URL</td>
+                <td><code>encodeURL("user@test")</code> → "user%40test"</td>
+            </tr>
+        </table>
+
+        <h3>Ejemplo: Mostrar datos de usuario de forma segura</h3>
+        <div class="example">
+            <strong>❌ ANTES (Vulnerable a XSS):</strong>
+            <div class="code-block">// Si el servidor devuelve datos no confiables
+                fetchDataArr(1, {...}, 9, function(response) {
+                // ¡PELIGRO! Si response contiene &lt;script&gt;, se ejecutará
+                $("#contenedor").html(response[0].descripcion);
+                });</div>
+
+            <strong>✅ DESPUÉS (Seguro):</strong>
+            <div class="code-block">// Codificar la salida antes de mostrarla
+                fetchDataArr(1, {...}, 9, function(response) {
+                const descripcionSegura = encodeHTML(response[0].descripcion);
+                $("#contenedor").text(descripcionSegura);
+                // O si necesitas HTML, usar un conjunto limitado de etiquetas permitidas
+                });</div>
+        </div>
+
+        <!-- SECCIÓN 4 -->
+        <h2>4️⃣ Content Security Policy (CSP)</h2>
+
+        <h3>¿Qué es CSP?</h3>
+        <p>CSP es una política de seguridad que controla qué recursos (scripts, estilos, imágenes) puede cargar tu
+            página.</p>
+
+        <h3>Implementación en el servidor (RECOMENDADO)</h3>
+        <p>Esta es la forma <strong>más efectiva</strong>. Tu desarrollador backend debe agregar este header HTTP:</p>
+
+        <div class="step">
+            <strong>Para ASP.NET / C#:</strong>
+            <div class="code-block">// En Global.asax o en Response filters
+                Response.Headers.Add("Content-Security-Policy",
+                "default-src 'self'; " +
+                "script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com code.jquery.com; " +
+                "style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; " +
+                "img-src 'self' data: https:; " +
+                "font-src 'self' fonts.gstatic.com; " +
+                "connect-src 'self' https:; " +
+                "frame-ancestors 'none'; " +
+                "base-uri 'self'; " +
+                "form-action 'self';"
+                );</div>
+        </div>
+
+        <h3>Implementación en HTML (Alternativa)</h3>
+        <p>Si no puedes modificar el servidor, puedes usar un meta tag (menos seguro):</p>
+
+        <div class="code-block">&lt;!-- En el &lt;head&gt; --&gt;
+            &lt;meta http-equiv="Content-Security-Policy" content="
+            default-src 'self';
+            script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com;
+            style-src 'self' 'unsafe-inline'"&gt;</div>
+
+        <h3>Monitorear violaciones de CSP en JavaScript:</h3>
+        <div class="code-block">// Llamar esta función una sola vez, al cargar
+            $(document).ready(function() {
+            monitorCSPViolations();
+            });
+
+            // Esto registrará en la consola cualquier violación de CSP detectada</div>
+
+        <!-- SECCIÓN 5 -->
+        <h2>5️⃣ Ejemplos Prácticos Completos</h2>
+
+        <h3>Ejemplo 1: Formulario de Alineación Seguro</h3>
+        <div class="example">
+            <div class="code-block">
+                function guardarAlineacionSegura() {
+                // Definir reglas de validación
+                const rules = {
+                _idAlineacion: {
+                type: 'number',
+                required: true,
+                min: 1
+                },
+                _txtAlineacion: {
+                type: 'string',
+                required: true,
+                minLength: 5,
+                maxLength: 500
+                },
+                _eFiscal: {
+                type: 'string',
+                required: true,
+                pattern: /^\d{4}$/
+                }
+                };
+
+                // Obtener datos del formulario
+                const formData = {
+                _idAlineacion: $("#cboAlineacion").val(),
+                _txtAlineacion: $("#txtAlineacion").val(),
+                _eFiscal: $("#cboEfiscal").val()
+                };
+
+                // Validar datos
+                const validation = validateAndPrepareData(formData, rules);
+
+                if (!validation.valid) {
+                validation.errors.forEach(error => {
+                logger.error(error);
+                });
+                showMsg(validation.errors.join(' | '), 'error');
+                return;
+                }
+
+                // Preparar datos seguros
+                const secureData = prepareSecureData(
+                validation.data,
+                AUTOMATA_SLAYER_VERSION
+                );
+
+                // Enviar al servidor
+                fetchDataArr(5, secureData, 9, function(response) {
+                if (response.flag) {
+                showMsg('Alineación guardada correctamente', 'success');
+                } else {
+                showMsg(response.msg, 'error');
+                }
+                });
+                }
+            </div>
+        </div>
+
+        <h3>Ejemplo 2: Mostrar Datos de Forma Segura</h3>
+        <div class="example">
+            <div class="code-block">
+                // Función para crear tarjetas de riesgo de forma segura
+                function mostrarRiesgosSeguro(riesgos) {
+                let html = '';
+
+                riesgos.forEach(riesgo => {
+                // CODIFICAR todos los datos que vienen del servidor
+                const descripcionSegura = encodeHTML(riesgo.DESC_RIESGO);
+                const procesoSeguro = encodeHTML(riesgo.NombreProceso);
+                const nivelSeguro = encodeHTML(riesgo.DESC_NIVEL_RIESGO);
+
+                html += `
+                &lt;div class='card'&gt;
+                &lt;div class='card-body'&gt;
+                &lt;h5 class='card-title'&gt;${descripcionSegura}&lt;/h5&gt;
+                &lt;p class='card-text'&gt;Proceso: ${procesoSeguro}&lt;/p&gt;
+                &lt;p class='card-text'&gt;Nivel: ${nivelSeguro}&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;/div&gt;
+                `;
+                });
+
+                $("#containerRiesgos").html(html);
+                }
+            </div>
+        </div>
+
+        <!-- SECCIÓN 6 -->
+        <h2>6️⃣ Checklist de Seguridad</h2>
+
+        <h3>Antes de deployar a producción:</h3>
+        <div class="step">
+            <input type="checkbox"> ✅ File securityHelper.js está incluido en la página HTML<br><br>
+            <input type="checkbox"> ✅ Todas las entradas de usuario son validadas con
+            <code>validateAndPrepareData()</code><br><br>
+            <input type="checkbox"> ✅ Todos los datos mostrados en HTML están codificados con
+            <code>encodeHTML()</code><br><br>
+            <input type="checkbox"> ✅ Los datos en atributos HTML están codificados con
+            <code>encodeAttribute()</code><br><br>
+            <input type="checkbox"> ✅ Las URLs generadas están codificadas con <code>encodeURL()</code><br><br>
+            <input type="checkbox"> ✅ CSP está configurado en el servidor (headers HTTP)<br><br>
+            <input type="checkbox"> ✅ Monitoreo de CSP activo con <code>monitorCSPViolations()</code><br><br>
+            <input type="checkbox"> ✅ El servidor valida <strong>TODOS</strong> los datos recibidos<br><br>
+            <input type="checkbox"> ✅ El servidor rechaza datos con versión de archivo incorrecta<br><br>
+            <input type="checkbox"> ✅ Se usan HTTPS (no HTTP) en producción<br><br>
+            <input type="checkbox"> ✅ Se han eliminado logs sensibles de la consola<br><br>
+            <input type="checkbox"> ✅ Se han probado ataques XSS y SQL injection<br><br>
+        </div>
+
+        <!-- RESUMEN -->
+        <h2>📌 Resumen de Cambios Recomendados</h2>
+
+        <table>
+            <tr>
+                <th>Archivo</th>
+                <th>Cambio</th>
+                <th>Importancia</th>
+            </tr>
+            <tr>
+                <td>automata-slayer.js</td>
+                <td>Usar <code>validateAndPrepareData()</code> y <code>encodeHTML()</code></td>
+                <td style="color: #d32f2f;"><strong>CRÍTICA</strong></td>
+            </tr>
+            <tr>
+                <td>apiHelper.js</td>
+                <td>Ya está mejorado con validación de índice y manejo de errores</td>
+                <td style="color: #f57c00;"><strong>ALTA</strong></td>
+            </tr>
+            <tr>
+                <td>HTML (Master/Layout)</td>
+                <td>Incluir securityHelper.js y configurar CSP header</td>
+                <td style="color: #d32f2f;"><strong>CRÍTICA</strong></td>
+            </tr>
+            <tr>
+                <td>Backend (C# / ASP.NET)</td>
+                <td>Validar y sanitizar TODOS los datos recibidos</td>
+                <td style="color: #d32f2f;"><strong>CRÍTICA</strong></td>
+            </tr>
+        </table>
+
+        <div class="success-box">
+            <strong>✅ Con estos cambios habrás mitigado:</strong>
+            <ul>
+                <li>Inyección SQL</li>
+                <li>XSS (Cross-Site Scripting)</li>
+                <li>Algunos ataques CSRF</li>
+                <li>Carga de scripts no autorizados</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Recuerda:</strong> La seguridad es un proceso continuo. Revisa regularmente el código,
+            mantén las dependencias actualizadas y realiza pruebas de seguridad periódicas.
+        </div>
+    </div>
+</body>
+
+</html>

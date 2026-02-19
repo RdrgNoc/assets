@@ -1,0 +1,445 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        DIAGRAMA FLUJO DE SEGURIDAD                           ║
+║                                                                              ║
+║    Cómo funciona la protección de principio a fin en tu aplicación          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+1. USUARIO ABRE LA PÁGINA
+════════════════════════════════════════════════════════════════════════════════
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │  HTML Master.master carga:                                  │
+    │                                                              │
+    │  <script src="/js/securityHelper.js"></script>  ← PRIMERO   │
+    │  <script src="/js/apiHelper.js"></script>                   │
+    │  <script src="/js/automata-slayer.js"></script>             │
+    │                                                              │
+    │  Servidor también envía CSP header:                         │
+    │  Content-Security-Policy: default-src 'self'; ...           │
+    └─────────────────────────────────────────────────────────────┘
+                              ↓
+    ┌─────────────────────────────────────────────────────────────┐
+    │  securityHelper.js se carga                                 │
+    │  ├─ Función sanitizeInput disponible                        │
+    │  ├─ Función validateAndPrepareData disponible               │
+    │  ├─ Función encodeHTML disponible                           │
+    │  └─ Función monitorCSPViolations disponible                 │
+    └─────────────────────────────────────────────────────────────┘
+                              ↓
+    ┌─────────────────────────────────────────────────────────────┐
+    │  monitorCSPViolations() se ejecuta                          │
+    │  Escucha a la red por intentos de cargar scripts no buenos  │
+    └─────────────────────────────────────────────────────────────┘
+
+
+2. USUARIO ESCRIBE EN UN FORMULARIO
+════════════════════════════════════════════════════════════════════════════════
+
+    Usuario digita en campo de texto:
+    [ Alice               ]    ← Normal
+    
+    O intenta inyectar:
+    [ <script>alert('XSS')</script> ]    ← Intento de ataque
+    
+    O intenta inyectar SQL:
+    [ 2020'; DROP TABLE users -- ]    ← Intento de ataque
+
+
+3. JAVASCRIPT VALIDA (CLIENTE)
+════════════════════════════════════════════════════════════════════════════════
+
+    Cuando el usuario hace clic en "Guardar":
+    
+    function guardarDatos() {
+        
+        // PASO 1: Obtener valor del formulario
+        const nombre = $("#txtNombre").val();
+        // → "Alice" O "<script>alert('XSS')</script>"
+        
+        ↓
+        
+        // PASO 2: Definir reglas de validación
+        const rules = {
+            nombre: { 
+                type: 'string', 
+                required: true, 
+                minLength: 3, 
+                maxLength: 100 
+            }
+        };
+        
+        ↓
+        
+        // PASO 3: Validar con validateAndPrepareData()
+        const validation = validateAndPrepareData(
+            { nombre: nombre },
+            rules
+        );
+        
+        ↓
+        
+        // PASO 4: Si hay error, mostrar y STOP
+        if (!validation.valid) {
+            console.error('Errores:', validation.errors);
+            showMsg('Por favor revise los datos ingresados', 'error');
+            return;  // ← STOP AQUÍ - No continúa
+        }
+        
+        ↓
+        
+        // PASO 5: Si es válido, preparar datos seguros
+        const secureData = prepareSecureData(
+            validation.data,
+            AUTOMATA_SLAYER_VERSION
+        );
+        
+        // secureData ahora incluye:
+        // {
+        //     nombre: "Alice",
+        //     _jsVersion: "1.0.0",
+        //     _timestamp: "2025-02-18T10:30:00Z",
+        //     _clientChecksum: "abc123def456..."
+        // }
+        
+        ↓
+        
+        // PASO 6: Enviar datos al servidor
+        fetchDataArr(5, secureData, 9, function(response) {
+            // Esperar respuesta...
+        });
+    }
+
+
+4. DATOS VIAJAN AL SERVIDOR
+════════════════════════════════════════════════════════════════════════════════
+
+    JavaScript envía:
+    
+    POST /API/GuardarAlineacion
+    Content-Type: application/json
+    
+    {
+        "nombre": "Alice",
+        "_jsVersion": "1.0.0",
+        "_timestamp": "2025-02-18T10:30:00Z",
+        "_clientChecksum": "abc123def456..."
+    }
+
+
+5. SERVIDOR VALIDA (C# / ASP.NET)
+════════════════════════════════════════════════════════════════════════════════
+
+    [HttpPost]
+    public JsonResult GuardarAlineacion(
+        string nombre,
+        string _jsVersion)
+    {
+        
+        // PASO 1: Validar versión del archivo
+        if (!ServerSecurityHelper.ValidateJsVersion(_jsVersion, "1.0.0"))
+        {
+            // ❌ Archivo viejo o modificado, rechazar
+            LogSecurityEvent("VERSION_MISMATCH", new { received = _jsVersion });
+            return Json(new { flag = false, msg = "Versión de archivo inválida" });
+        }
+        
+        ↓
+        
+        // PASO 2: Validar nombre (cadena segura)
+        if (!ServerSecurityHelper.ValidateSafeString(nombre, 100))
+        {
+            // ❌ Contiene SQL injection, rechazar
+            LogSecurityEvent("SQL_INJECTION_ATTEMPT", new { input = nombre });
+            return Json(new { flag = false, msg = "Datos inválidos" });
+        }
+        
+        ↓
+        
+        // PASO 3: Verificar que el usuario tiene permiso
+        if (!ServerSecurityHelper.ValidateUserAccess(currentUserId, resourceId, "ALINEACION"))
+        {
+            // ❌ Usuario no autorizado, rechazar
+            LogSecurityEvent("UNAUTHORIZED_ACCESS", new { user = currentUserId });
+            return Json(new { flag = false, msg = "No autorizado" });
+        }
+        
+        ↓
+        
+        // PASO 4: Ejecutar query con Parametrized Statements
+        using (SqlCommand cmd = new SqlCommand(
+            "INSERT INTO ALINEACIONES (nombre) VALUES (@nombre)", 
+            connection))
+        {
+            // ✅ CORRECTO: Parámetros evitan inyección SQL
+            cmd.Parameters.AddWithValue("@nombre", nombre);
+            cmd.ExecuteNonQuery();
+        }
+        
+        ↓
+        
+        // PASO 5: Registrar exitosa
+        LogSecurityEvent("ALINEACION_CREATED", new { nombre = nombre });
+        
+        ↓
+        
+        // PASO 6: Responder al cliente
+        return Json(new { flag = true, msg = "Guardado exitosamente" });
+    }
+
+
+6. SERVIDOR RESPONDE
+════════════════════════════════════════════════════════════════════════════════
+
+    Servidor devuelve:
+    
+    {
+        "flag": true,
+        "msg": "Guardado exitosamente",
+        "data": [
+            {
+                "id": 1,
+                "nombre": "Alice",
+                "descripcion": "Alineación de control",
+                "fecha": "2025-02-18"
+            }
+        ]
+    }
+
+
+7. JAVASCRIPT RECIBE Y CODIFICA
+════════════════════════════════════════════════════════════════════════════════
+
+    fetchDataArr(5, secureData, 9, function(response) {
+        
+        if (response.flag) {
+            // PASO 1: Codificar todos los datos antes de mostrar
+            const nombreSeguro = encodeHTML(response.data[0].nombre);
+            const descripcionSegura = encodeHTML(response.data[0].descripcion);
+            
+            // PASO 2: Mostrar en la página
+            $("#tabla").html(`
+                <tr>
+                    <td>${nombreSeguro}</td>
+                    <td>${descripcionSegura}</td>
+                </tr>
+            `);
+            
+            // PASO 3: Mostrar mensaje
+            showMsg(response.msg, 'success');
+        }
+    });
+
+
+8. USUARIO VE LA PÁGINA SEGURA
+════════════════════════════════════════════════════════════════════════════════
+
+    En el navegador se ve:
+    
+    ┌──────────────────────────────┐
+    │  Alineación guardada exitoso │
+    ├──────────────────────────────┤
+    │ Nombre  │ Descripción        │
+    ├─────────┼────────────────────┤
+    │ Alice   │ Alineación control │
+    └──────────────────────────────┘
+    
+    ✅ Completamente seguro - Sin XSS ni SQL injection
+
+
+CASOS DE ATAQUE ESPECÍFICOS
+════════════════════════════════════════════════════════════════════════════════
+
+CASO 1: XSS ATTACK
+─────────────────
+
+Usuario escribe: <script>alert('HACKED')</script>
+
+Momento                     Acción
+────────────────────────────────────────────────────────────────
+1. Usuario digita           Cliente captura el texto
+2. JavaScript valida        ❌ RECHAZA por contener caracteres peligrosos
+3. Mostrar error            Usuario ve: "Datos inválidos"
+4. STOP                     Nunca llega al servidor ✓
+
+
+CASO 2: SQL INJECTION ATTACK
+─────────────────────────────
+
+Usuario escribe: 2020'; DROP TABLE users --
+
+Momento                     Acción
+────────────────────────────────────────────────────────────────
+1. Usuario digita           Cliente captura el texto
+2. JavaScript valida        ❌ RECHAZA por contener SQL keywords (DROP, --)
+3. Mostrar error            Usuario ve: "Año fiscal inválido"
+4. STOP                     Nunca llega al servidor ✓
+
+PERO SI LOGRARA ENVIAR:      Servidor también valida:
+                            ├─ Detecta SQL keywords
+                            ├─ Registra intento en auditoría
+                            └─ Rechaza la petición
+
+
+CASO 3: MANIPULACIÓN HTML
+──────────────────────────
+
+Usuario en F12 (DevTools) cambia:
+<button data-id="123">Editar</button>
+       ↓
+<button data-id="999">Editar</button>
+
+Momento                     Acción
+────────────────────────────────────────────────────────────────
+1. Usuario hace clic        JavaScript obtiene id = 999
+2. Envía al servidor        
+3. Servidor valida          ✓ ID 999 existe, PERO...
+4. Verificar permisos       ❌ El usuario no tiene acceso a ID 999
+5. RECHAZA                  Usuario ve: "No autorizado"
+
+✓ PROTEGIDO porque validamos en servidor, no confiamos en cliente
+
+
+CASO 4: CSP VIOLATION
+─────────────────────
+
+Código HTML malo intenta inyectar:
+<script>eval(maliciousCode)</script>
+
+Momento                     Acción
+────────────────────────────────────────────────────────────────
+1. CSP Policy activa        Navegador revisa permiso
+2. Script inline?           ❌ CSP no permite 'unsafe-eval'
+3. BLOQUEA                  Script NO se ejecuta
+4. Registra evento          monitorCSPViolations() lo captura
+5. Envía a logs             Equipo de seguridad se entera
+
+
+COMPARATIVA ANTES vs DESPUÉS
+════════════════════════════════════════════════════════════════════════════════
+
+ANTES (VULNERABLE):
+──────────────────
+
+Usuario digita malicioso:
+    ↓
+JavaScript envía sin validar:
+    ↓
+Servidor recibe sin validar:
+    ↓
+Executa SQL: "SELECT * FROM users WHERE name = '" + nombre + "'"
+    ↓
+Si usuario escribe: alice'; DROP TABLE users --
+    ↓
+SQL becomes: "SELECT * FROM users WHERE name = 'alice'; DROP TABLE users --'"
+    ↓
+💥 BASE DE DATOS COMPROMETIDA
+
+
+DESPUÉS (SEGURO):
+─────────────────
+
+Usuario digita malicioso:
+    ↓
+JavaScript VALIDA:
+    ├─ ValidateSafeString() → Rechaza
+    └─ showMsg("Datos inválidos")
+    ↓
+Nunca llega al servidor ✓
+
+O si lograra enviar:
+
+Servidor VALIDA:
+    ├─ ServerSecurityHelper.ValidateSafeString() → Rechaza
+    ├─ LogSecurityEvent("INJECTION_ATTEMPT")
+    └─ Responde: {"flag": false, "msg": "Error"}
+    ↓
+Base de datos SEGURA ✓
+
+
+LAYERS DE SEGURIDAD (Defense in Depth)
+════════════════════════════════════════════════════════════════════════════════
+
+                    USUARIO
+                      ↓
+        ┌─────────────────────────────┐
+        │  CAPA 1: NAVEGADOR (CSP)    │
+        │ Bloquea scripts no autorizados
+        └─────────────────────────────┘
+                      ↓
+        ┌─────────────────────────────┐
+        │  CAPA 2: JAVASCRIPT (Validación)
+        │ ├─ Sanitización
+        │ ├─ Validación de formato
+        │ └─ Codificación de salida
+        └─────────────────────────────┘
+                      ↓
+        ┌─────────────────────────────┐
+        │  CAPA 3: HTTPS/TLS          │
+        │ Encripta datos en tránsito
+        └─────────────────────────────┘
+                      ↓
+        ┌─────────────────────────────┐
+        │  CAPA 4: SERVIDOR (Validación)
+        │ ├─ Validación de versión
+        │ ├─ Validación de datos
+        │ ├─ Validación de permisos
+        │ └─ Parametrized Queries
+        └─────────────────────────────┘
+                      ↓
+        ┌─────────────────────────────┐
+        │  CAPA 5: BD (Permisos SQL)  │
+        │ El usuario de BD solo puede
+        │ realizar acciones específicas
+        └─────────────────────────────┘
+
+
+MONITOREO Y AUDITORÍA
+════════════════════════════════════════════════════════════════════════════════
+
+Mientras todo esto ocurre, se está registrando:
+
+CLIENTE:
+┌────────────────────────────────────────────────────────┐
+│ Violaciones de CSP capturadas en consola               │
+│ Validaciones fallidas loguadas                         │
+│ Errores de seguridad capturados                        │
+└────────────────────────────────────────────────────────┘
+
+SERVIDOR:
+┌────────────────────────────────────────────────────────┐
+│ LogSecurityEvent("INJECTION_ATTEMPT")                  │
+│ LogSecurityEvent("UNAUTHORIZED_ACCESS")                │
+│ LogSecurityEvent("VERSION_MISMATCH")                   │
+│ LogSecurityEvent("VALIDATION_FAILED")                  │
+│ Todas las acciones de usuarios registradas             │
+└────────────────────────────────────────────────────────┘
+
+BD:
+┌────────────────────────────────────────────────────────┐
+│ Tabla AUDIT_LOG con:                                   │
+│ - Usuario que hizo la acción                           │
+│ - Qué cambió                                           │
+│ - Cuándo ocurrió                                       │
+│ - Resultado (éxito/fallo)                              │
+└────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                                RESUMEN FINAL
+═══════════════════════════════════════════════════════════════════════════════
+
+La arquitectura de seguridad trabaja en CAPAS:
+
+1. Browser bloquea scripts maliciosos (CSP)
+2. JavaScript valida y codifica (Frontend security)
+3. HTTPS encripta la comunicación (Transport security)
+4. Servidor valida TODOS los datos (Backend security)
+5. Base de datos tiene permisos restrictivos (DB security)
+6. Auditoría registra todo lo que sucede (Monitoring)
+
+Si fallan 5 capas, todavía tienes 1 más. ✓
+Si fallan 4, todavía tienes 2 más. ✓
+Nunca confíes en una sola capa.
+
+═══════════════════════════════════════════════════════════════════════════════
