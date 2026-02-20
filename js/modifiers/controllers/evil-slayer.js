@@ -932,6 +932,38 @@ function getNotifications(_eFiscal) {
     });
 }
 
+function settingCount(cveOS, cveUP, eFiscal) {
+    fetchDataArr(25, { _OS: cveOS, _UP: cveUP, _eFiscal: eFiscal }, 4, function (response) {
+        if (response) {
+            logger.log("RESPUESTA DE CONTEO DE DATOS: ", response);
+            if (response !== 'error') {
+                if (response.length === 1) {
+                    $("#cRd").text(response[0].NUM_RIESGOS);
+                    $("#cFd").text(response[0].NUM_FACTORES);
+                    $("#cCd").text(response[0].NUM_CONTROLES);
+                    $("#cAd").text(response[0].NUM_ACCIONES);
+                    $("#cAcd").text(response[0].NUM_ACTIVIDADES);
+                    $("#cEd").text(response[0].NUM_EVIDENCIAS);
+                    $("#cARd").text(response[0].NUM_REPORTE_ACTIVIDAD);
+                } else {
+                    $("#cRd").text(0);
+                    $("#cFd").text(0);
+                    $("#cCd").text(0);
+                    $("#cAd").text(0);
+                    $("#cAcd").text(0);
+                    $("#cEd").text(0);
+                    $("#cARd").text(0);
+                }
+            } else {
+                showMsg("Ocurrió un error al obtener los datos.", 'error');
+                return;
+            }
+        } else if (response === "error") {
+            showMsg("Error al cargar datos", 'error');
+        }
+    });
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -949,6 +981,7 @@ $(document).ready(function () {
         getDataRiesgos(cveOSd, cveUPd, cveEfiscald);
         gDdocChart(cveOSd, cveUPd, 'printPage', 'null', 1, cveEfiscald);
         getFirmasReportes(cveOSd, cveUPd, cveEfiscald);
+        settingCount(cveOSd, cveUPd, cveEfiscald);
         //getRiesgosTable(cveOSd, cveUPd, cveEfiscald);
         //getNotifications();
         //setInterval(getNotifications, 10000);
@@ -959,6 +992,7 @@ $(document).ready(function () {
         getDataRiesgosA(cveOSd, cveUPd, cveEfiscald);
         gDdocChart(cveOSd, cveUPd, 'printPage', 'null', 1, cveEfiscald);
         getFirmasReportes(cveOSd, cveUPd, cveEfiscald);
+        settingCount(cveOSd, cveUPd, cveEfiscald);
     } else if (idRolUser === '103') {  //ENLACE LEONARDO
         $("#cboOs").attr("disabled", true);
         $("#cboUp").attr("disabled", false);
@@ -980,10 +1014,12 @@ $(document).ready(function () {
                 getDataRiesgos($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
                 gDdocChart($("#cboOs").val(), $("#cboUp").val(), 'printPage', 'null', 1, $("#cboEfiscal").val());
                 getFirmasReportes(cveOS, cveUP, eFiscal);
+                settingCount(cveOS, cveUP, eFiscal);
             } else if (idRolUser === '102') {
                 getDataRiesgosA($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
                 gDdocChart($("#cboOs").val(), $("#cboUp").val(), 'printPage', 'null', 1, $("#cboEfiscal").val());
                 getFirmasReportes(cveOS, cveUP, eFiscal);
+                settingCount(cveOS, cveUP, eFiscal);
             } else if (idRolUser === '103') {
                 //getDataRiesgosAA($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
                 gDdocChart($("#cboOs").val(), $("#cboUp").val(), 'printPage', 'null', 1, $("#cboEfiscal").val());
@@ -1003,9 +1039,11 @@ $(document).ready(function () {
             if (idRolUser === '101') {
                 getDataRiesgos($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
                 getFirmasReportes(cveOS, cveUP, eFiscal);
+                settingCount(cveOS, cveUP, eFiscal);
             } else if (idRolUser === '102') {
                 getDataRiesgosA($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
                 getFirmasReportes(cveOS, cveUP, eFiscal);
+                settingCount(cveOS, cveUP, eFiscal);
             } else if (idRolUser === '103') {
                 //getDataRiesgosAA($("#cboOs").val(), $("#cboUp").val(), $("#cboEfiscal").val());
             } else if (idRolUser === '104') {
