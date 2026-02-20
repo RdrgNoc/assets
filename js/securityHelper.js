@@ -102,7 +102,7 @@ window.isValidDate = function (date) {
  * @param {string} text - Texto a codificar
  * @returns {string} - Texto codificado seguro
  */
-window.encodeHTML = function (text) {
+window.encodeHTMLString = function (text) {
     if (typeof text !== 'string') {
         return '';
     }
@@ -116,6 +116,27 @@ window.encodeHTML = function (text) {
     };
 
     return text.replace(/[&<>"']/g, char => map[char]);
+};
+
+/**
+ * Codifica HTML para prevenir XSS
+ * @param {string} text - Texto a codificar
+ * @returns {string} - Texto codificado seguro
+ */
+window.encodeHTMLInteger = function (value) {
+    if (typeof value !== 'integer' && typeof value !== 'number') {
+        return 0;
+    }
+
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+
+    return value.toString().replace(/[&<>"']/g, char => map[char]);
 };
 
 /**

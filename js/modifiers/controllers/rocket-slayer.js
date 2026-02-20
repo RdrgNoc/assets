@@ -847,33 +847,32 @@ function gDaoList(eFiscal) {
     var html = '';
     blockUICustom();
     fetchDataArr(28, { _eFiscal: eFiscal }, 6, function (response) {
-        if (response) {
-            logger.log(`%cDatos recibidos de LISTA DE AREAS OPORTUNIDADES`, "color: rgba(255, 50, 50, 0.2); font-weight: bold; background: #111; padding: 4px;");
-            logger.table(response);
-            if (response !== 'error') {
-                if (response.length !== 0) {
-                    response.forEach(function (item) {
-                        var sumHtml = "";
-                        var sumHtml2 = "";
-                        var disabledBtn = "";
-                        var textColor = "";
+        logger.log(`%cDatos recibidos de LISTA DE AREAS OPORTUNIDADES`);
+        logger.table(response);
+        if (response.flag) {
+            if (response.listData.length !== 0) {
+                response.listData.forEach(function (item) {
+                    var sumHtml = "";
+                    var sumHtml2 = "";
+                    var disabledBtn = "";
+                    var textColor = "";
 
-                        if (item.ID_ESTATUS === 6 || item.ID_ESTATUS > 6) {
-                            disabledBtn = "disabled";
-                            textColor = "text-secondary";
-                        } else {
-                            disabledBtn = "";
-                            textColor = "text-warning";
-                        }
+                    if (item.ID_ESTATUS === 6 || item.ID_ESTATUS > 6) {
+                        disabledBtn = "disabled";
+                        textColor = "text-secondary";
+                    } else {
+                        disabledBtn = "";
+                        textColor = "text-warning";
+                    }
 
-                        if (idRolUser === '101') {
-                            sumHtml = `<a class='dropdown-item ${disabledBtn} ${textColor}' type='button'>Sin accesos</a>`;
-                        } else {
-                            sumHtml = `<a class='dropdown-item ${disabledBtn} ${textColor} btnEditDatosArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Editar área</a>`;
-                            sumHtml2 = `<a class='dropdown-item ${disabledBtn} ${textColor} btnDeleteArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Eliminar área</a>`;
-                        }
+                    if (idRolUser === '101') {
+                        sumHtml = `<a class='dropdown-item ${disabledBtn} ${textColor}' type='button'>Sin accesos</a>`;
+                    } else {
+                        sumHtml = `<a class='dropdown-item ${disabledBtn} ${textColor} btnEditDatosArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Editar área</a>`;
+                        sumHtml2 = `<a class='dropdown-item ${disabledBtn} ${textColor} btnDeleteArea' type='button' data-ctrl-area='${item.ID_CTRL_AREA_OPORTUNIDAD}'>Eliminar área</a>`;
+                    }
 
-                        html += `<tr class='btn-reveal-trigger'>
+                    html += `<tr class='btn-reveal-trigger'>
                                         <td>
                                           <div class='d-flex align-items-center position-relative'>
                                             <div class='avatar avatar-xl'>
@@ -903,18 +902,16 @@ function gDaoList(eFiscal) {
                                             </div>
                                         </td>-->
                                     </tr>`
-                    });
-                    recargarTablaSinOpciones("tableAreasOportunidadA", html);
-                } else {
-                    recargarTablaSinOpciones("tableAreasOportunidadA", null);
-                    showMsg("Registre al menos un reporte para iniciar.", 'info');
-                }
-                Swal.close();
+                });
+                recargarTablaSinOpciones("tableAreasOportunidadA", html);
             } else {
-                showMsg("Ocurrio un error al mostrar resultados.", 'error');
+                recargarTablaSinOpciones("tableAreasOportunidadA", null);
+                showMsg("Registre al menos un reporte para iniciar.", 'info');
             }
-        } else if (response === "error") {
-            showMsg("Error al cargar datos", 'error');
+            Swal.close();
+        } else {
+            showMsg(response.msg, 'error');
+            Swal.close();
         }
     });
 }

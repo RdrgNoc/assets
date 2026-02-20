@@ -95,6 +95,12 @@ window.fetchDataArr = function (endpointKey, data, z, onSuccess, method = 'POST'
             data: JSON.stringify(data),
             async: true,
             //timeout: 10000,
+            beforeSend: function (xhr) {
+                const token = document.getElementById('csrfToken')?.value;
+                if (token) {
+                    xhr.setRequestHeader('X-CSRF-TOKEN', token);
+                }
+            },
             success: function (result) {
                 if (Array.isArray(result.d)) {
                     onSuccess(result.d);

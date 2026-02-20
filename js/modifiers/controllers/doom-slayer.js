@@ -1,7 +1,7 @@
 ﻿
 // ==== CONTROL DE VERSIÓN DEL ARCHIVO ====
 // Versión del archivo: doom-slayer.js
-const DOOM_SLAYER_VERSION = '1.0.0';
+const DOOM_SLAYER_VERSION = '1.0.0.a0005';
 
 'use strict';
 
